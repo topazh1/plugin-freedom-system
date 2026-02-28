@@ -48,5 +48,5 @@ jobs:
           name: Chaosverb-Windows-VST3
           # Path to where CMake outputs the VST3 on Windows. 
           # Usually it's in the build directory under plugins/Chaosverb/Chaosverb_artefacts/Release/VST3/
-          path: build/plugins/Chaosverb/Chaosverb_artefacts/Release/VST3/Chaosverb.vst3
+          path: build/**/Chaosverb.vst3
           retention-days: 7
