@@ -43,6 +43,10 @@ jobs:
         # Build only the Chaosverb target to bypass crashes in other plugins
         run: cmake --build build --config Release --target Chaosverb --parallel 4 || true
 
+      - name: Find VST3 files
+        run: Get-ChildItem -Path . -Recurse -Filter *.vst3
+        shell: powershell
+
       - name: Upload VST3 Artifact
         uses: actions/upload-artifact@v4
         with:
