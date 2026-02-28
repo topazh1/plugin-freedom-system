@@ -1,0 +1,462 @@
+---
+# NBS DynaDrive — UI Design Specification v1
+# Generated: 2026-02-27
+# Agent: ui-design-agent
+
+plugin:
+  name: NBS_DynaDrive
+  display_name: "NBS DynaDrive"
+  type: "saturation + dynamics processor"
+  version: "1.0.0"
+  tagline: "Clean saturation without aliasing — Neve warmth, API dynamics"
+
+window:
+  main_width: 740
+  main_height: 370
+  expanded_width: 740
+  expanded_height: 590
+  resizable: false
+  default_state: collapsed
+
+finalization_marker: false
+
+# ─────────────────────────────────────────────
+# COLOR SYSTEM
+# ─────────────────────────────────────────────
+color_system:
+  background: "#141414"
+  panel_surface: "#1e1e1e"
+  section_divider: "#2a2a2a"
+  accent_saturation: "#c0392b"
+  accent_dynamics: "#4a90d9"
+  accent_neutral: "#888888"
+  text_primary: "#e8e8e8"
+  text_secondary: "#888888"
+  knob_body: "#1a1a1a"
+  meter_green_low: "#22c55e"
+  meter_green_high: "#16a34a"
+  meter_amber: "#f59e0b"
+  meter_red: "#ef4444"
+  meter_orange: "#f97316"
+  meter_inactive: "#2a2a2a"
+
+# ─────────────────────────────────────────────
+# CONTROL STYLE
+# ─────────────────────────────────────────────
+control_style:
+  knob_type: "backlit_arc"
+  description: >
+    Dark circular body (#1a1a1a) with subtle drop shadow. A glowing SVG arc
+    indicator ring sweeps 270 degrees around the knob showing current value.
+    Arc color corresponds to section: red for saturation, blue for dynamics,
+    gray for utility. Small dot indicator on knob face. Label below in #888
+    at 11px. Value readout below label in 10px dimmer text. Interactive:
+    click-drag vertical to adjust, double-click to reset.
+  arc_sweep_degrees: 270
+  arc_start_angle: 135
+  arc_end_angle: 45
+
+# ─────────────────────────────────────────────
+# LAYOUT SECTIONS
+# ─────────────────────────────────────────────
+layout_sections:
+  saturation:
+    label: "SATURATION"
+    label_color: "#c0392b"
+    x: 20
+    y: 0
+    width: 210
+    height: 330
+    accent: "#c0392b"
+
+  center:
+    label: "NBS DynaDrive"
+    x: 248
+    y: 0
+    width: 244
+    height: 330
+    accent: "#888888"
+
+  dynamics:
+    label: "DYNAMICS"
+    label_color: "#4a90d9"
+    x: 510
+    y: 0
+    width: 170
+    height: 330
+    accent: "#4a90d9"
+
+  metering:
+    x: 692
+    y: 10
+    width: 38
+    height: 310
+
+  advanced_toggle_bar:
+    x: 0
+    y: 340
+    width: 740
+    height: 30
+
+  advanced_panel:
+    x: 0
+    y: 370
+    width: 740
+    height: 220
+    collapsible: true
+    default: collapsed
+
+# ─────────────────────────────────────────────
+# PARAMETERS / CONTROLS
+# ─────────────────────────────────────────────
+controls:
+
+  # ── SATURATION SECTION ──────────────────────
+
+  - id: drive
+    label: "DRIVE"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 20.0
+    unit: "%"
+    size:
+      diameter: 55
+    position:
+      x: 50
+      y: 50
+    knob_size: large
+    description: "Primary saturation input drive"
+
+  - id: even
+    label: "EVEN"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 40
+    position:
+      x: 30
+      y: 155
+    knob_size: medium
+    description: "Even harmonic content (2nd/4th order)"
+
+  - id: odd
+    label: "ODD"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 40
+    position:
+      x: 120
+      y: 155
+    knob_size: medium
+    description: "Odd harmonic content (3rd/5th order)"
+
+  # ── CENTER SECTION ───────────────────────────
+
+  - id: pre_post
+    label: "SIGNAL FLOW"
+    type: toggle
+    section: center
+    accent: "#4a90d9"
+    range: [0, 1]
+    default: 0
+    values: ["DYN→SAT", "SAT→DYN"]
+    size:
+      width: 110
+      height: 36
+    position:
+      x: 315
+      y: 155
+    description: "Pre/post saturation routing toggle"
+
+  - id: mix
+    label: "MIX"
+    type: slider
+    section: center
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 100.0
+    unit: "%"
+    size:
+      diameter: 35
+    position:
+      x: 282
+      y: 240
+    knob_size: small
+    description: "Dry/wet parallel blend"
+
+  - id: output
+    label: "OUTPUT"
+    type: slider
+    section: center
+    accent: "#888888"
+    range: [-12.0, 12.0]
+    default: 0.0
+    unit: "dB"
+    size:
+      diameter: 35
+    position:
+      x: 383
+      y: 240
+    knob_size: small
+    description: "Output gain / makeup gain"
+
+  # ── DYNAMICS SECTION ─────────────────────────
+
+  - id: dynamics
+    label: "DYNAMICS"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 30.0
+    unit: "%"
+    size:
+      diameter: 55
+    position:
+      x: 538
+      y: 50
+    knob_size: large
+    description: "Macro dynamics control (upward + downward compression)"
+
+  - id: up
+    label: "UP"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 35
+    position:
+      x: 518
+      y: 155
+    knob_size: small
+    description: "Upward compression amount"
+
+  - id: down
+    label: "DOWN"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 35
+    position:
+      x: 613
+      y: 155
+    knob_size: small
+    description: "Downward compression amount"
+
+  # ── ADVANCED PANEL — DYNAMICS DETAIL ─────────
+
+  - id: threshold
+    label: "THRESHOLD"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [-40.0, 0.0]
+    default: -18.0
+    unit: "dB"
+    size:
+      diameter: 40
+    position:
+      x: 35
+      y: 415
+    knob_size: medium
+    description: "Compressor threshold"
+
+  - id: ratio
+    label: "RATIO"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [1.0, 10.0]
+    default: 4.0
+    unit: ":1"
+    size:
+      diameter: 40
+    position:
+      x: 110
+      y: 415
+    knob_size: medium
+    description: "Compression ratio"
+
+  - id: attack_time
+    label: "ATTACK"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [0.1, 100.0]
+    default: -1.0
+    unit: "ms"
+    size:
+      diameter: 40
+    position:
+      x: 185
+      y: 415
+    knob_size: medium
+    description: "Attack time (default: program-dependent Auto)"
+
+  - id: release_time
+    label: "RELEASE"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [10.0, 1000.0]
+    default: -1.0
+    unit: "ms"
+    size:
+      diameter: 40
+    position:
+      x: 260
+      y: 415
+    knob_size: medium
+    description: "Release time (default: program-dependent Auto)"
+
+  # ── ADVANCED PANEL — SATURATION + M/S ────────
+
+  - id: h_curve
+    label: "H-CURVE"
+    type: combo
+    section: advanced_saturation
+    accent: "#c0392b"
+    range: [0, 2]
+    default: 1
+    values: ["Soft", "Medium", "Hard"]
+    size:
+      width: 140
+      height: 28
+    position:
+      x: 490
+      y: 405
+    description: "Saturation curve shape"
+
+  - id: ms_enable
+    label: "M/S MODE"
+    type: toggle
+    section: advanced_ms
+    accent: "#888888"
+    range: [0, 1]
+    default: 0
+    values: ["STEREO", "M/S"]
+    size:
+      width: 100
+      height: 28
+    position:
+      x: 490
+      y: 455
+    description: "Enable mid/side processing mode"
+
+  - id: mid_drive
+    label: "MID"
+    type: slider
+    section: advanced_ms
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 35
+    position:
+      x: 490
+      y: 500
+    knob_size: small
+    description: "Independent mid channel saturation (visible when M/S enabled)"
+    visible_when: "ms_enable == 1"
+
+  - id: side_drive
+    label: "SIDE"
+    type: slider
+    section: advanced_ms
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 35
+    position:
+      x: 570
+      y: 500
+    knob_size: small
+    description: "Independent side channel saturation (visible when M/S enabled)"
+    visible_when: "ms_enable == 1"
+
+# ─────────────────────────────────────────────
+# METERING
+# ─────────────────────────────────────────────
+meters:
+  - id: input_meter
+    label: "IN"
+    position:
+      x: 692
+      y: 20
+    size:
+      width: 14
+      height: 280
+    segments: 20
+    direction: "bottom_to_top"
+    color_zones:
+      - range: [0, 14]
+        color: "#22c55e"
+      - range: [14, 17]
+        color: "#f59e0b"
+      - range: [17, 20]
+        color: "#ef4444"
+
+  - id: gr_meter
+    label: "GR"
+    position:
+      x: 712
+      y: 20
+    size:
+      width: 14
+      height: 280
+    segments: 20
+    direction: "top_to_bottom"
+    color_zones:
+      - range: [0, 20]
+        color: "#f97316"
+
+# ─────────────────────────────────────────────
+# TYPOGRAPHY
+# ─────────────────────────────────────────────
+typography:
+  font_stack: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  plugin_name:
+    size: 18px
+    weight: 600
+    color: "#e8e8e8"
+    letter_spacing: "0.08em"
+  section_label:
+    size: 10px
+    weight: 700
+    color: "section accent"
+    letter_spacing: "0.15em"
+    text_transform: uppercase
+  knob_label:
+    size: 11px
+    weight: 500
+    color: "#888888"
+    letter_spacing: "0.1em"
+  knob_value:
+    size: 10px
+    weight: 400
+    color: "#555555"
+  advanced_note:
+    size: 10px
+    style: italic
+    color: "#555555"

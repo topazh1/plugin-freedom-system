@@ -1,0 +1,398 @@
+---
+# Chaosverb UI Specification — v1
+# Generated: 2026-02-27
+# Window: 780 x 360 (landscape, compact)
+# finalized: true
+# finalized_date: 2026-02-27
+
+window:
+  width: 780
+  height: 360
+  resizable: false
+  title: "Chaosverb"
+
+# Layout zones (for documentation):
+#   Header bar:    y=0..54
+#   Upper body:    y=62..220   (SPACE / SPECTRAL / MOTION sections)
+#   Divider:       y=222
+#   Lower body:    y=230..330  (MUTATION / OUTPUT sections)
+#
+# Knob diameter: 56px (all audio parameter knobs)
+# Slider height: 28px (mutation controls, horizontal sliders)
+# Edge padding:  20px minimum
+
+controls:
+
+  # ── SPACE SECTION ──────────────────────────────────────────────
+  # Section accent: Electric cyan #00d4ff
+  # 2x2 knob grid, columns at x=30 and x=118
+
+  - id: topology
+    type: slider
+    label: "Topology"
+    section: space
+    position: { x: 30, y: 82 }
+    size: { width: 56, height: 56 }
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: ""
+    lockable: true
+    lock_id: topologyLock
+    visual: knob
+
+  - id: decay
+    type: slider
+    label: "Decay"
+    section: space
+    position: { x: 118, y: 82 }
+    size: { width: 56, height: 56 }
+    range: [0.1, 60.0]
+    default: 4.0
+    unit: "s"
+    lockable: true
+    lock_id: decayLock
+    visual: knob
+
+  - id: pre_delay
+    type: slider
+    label: "Pre-Delay"
+    section: space
+    position: { x: 30, y: 164 }
+    size: { width: 56, height: 56 }
+    range: [0.0, 250.0]
+    default: 10.0
+    unit: "ms"
+    lockable: true
+    lock_id: preDelayLock
+    visual: knob
+
+  - id: density
+    type: slider
+    label: "Density"
+    section: space
+    position: { x: 118, y: 164 }
+    size: { width: 56, height: 56 }
+    range: [0.0, 100.0]
+    default: 60.0
+    unit: "%"
+    lockable: true
+    lock_id: densityLock
+    visual: knob
+
+  # ── SPECTRAL SECTION ───────────────────────────────────────────
+  # Section accent: Electric cyan #00d4ff
+  # 2 knobs, vertically stacked at x=228
+
+  - id: spectral_tilt
+    type: slider
+    label: "Sp.Tilt"
+    section: spectral
+    position: { x: 228, y: 82 }
+    size: { width: 56, height: 56 }
+    range: [-100.0, 100.0]
+    default: 0.0
+    unit: ""
+    lockable: true
+    lock_id: spectralTiltLock
+    visual: knob
+
+  - id: resonance
+    type: slider
+    label: "Resonance"
+    section: spectral
+    position: { x: 228, y: 164 }
+    size: { width: 56, height: 56 }
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    lockable: true
+    lock_id: resonanceLock
+    visual: knob
+
+  # ── MOTION SECTION ─────────────────────────────────────────────
+  # Section accent: Void purple #9b59b6
+  # 2 knobs, vertically stacked at x=338
+
+  - id: mod_rate
+    type: slider
+    label: "Mod Rate"
+    section: motion
+    position: { x: 338, y: 82 }
+    size: { width: 56, height: 56 }
+    range: [0.01, 10.0]
+    default: 0.3
+    unit: "Hz"
+    lockable: true
+    lock_id: modRateLock
+    visual: knob
+
+  - id: mod_depth
+    type: slider
+    label: "Mod Depth"
+    section: motion
+    position: { x: 338, y: 164 }
+    size: { width: 56, height: 56 }
+    range: [0.0, 100.0]
+    default: 20.0
+    unit: "%"
+    lockable: true
+    lock_id: modDepthLock
+    visual: knob
+
+  # ── MUTATION SECTION ───────────────────────────────────────────
+  # Section accent: Neutral gray #888888
+  # Horizontal sliders in lower row (NOT lockable)
+  # Positioned in lower body zone
+
+  - id: mutation_interval
+    type: slider
+    label: "Interval"
+    section: mutation
+    position: { x: 440, y: 82 }
+    size: { width: 120, height: 28 }
+    range: [5.0, 600.0]
+    default: 30.0
+    unit: "s"
+    lockable: false
+    visual: hslider
+
+  - id: crossfade_speed
+    type: slider
+    label: "Crossfade"
+    section: mutation
+    position: { x: 440, y: 164 }
+    size: { width: 120, height: 28 }
+    range: [0.0, 500.0]
+    default: 100.0
+    unit: "ms"
+    lockable: false
+    visual: hslider
+
+  # ── OUTPUT SECTION ─────────────────────────────────────────────
+  # Section accent: Neutral gray #888888
+  # 2 knobs with locks in lower body zone
+
+  - id: width
+    type: slider
+    label: "Width"
+    section: output
+    position: { x: 620, y: 82 }
+    size: { width: 56, height: 56 }
+    range: [0.0, 200.0]
+    default: 100.0
+    unit: "%"
+    lockable: true
+    lock_id: widthLock
+    visual: knob
+
+  - id: mix
+    type: slider
+    label: "Mix"
+    section: output
+    position: { x: 700, y: 82 }
+    size: { width: 56, height: 56 }
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    lockable: true
+    lock_id: mixLock
+    visual: knob
+
+  # ── LOCK BOOLEANS ──────────────────────────────────────────────
+  # These are embedded in knob visuals — click on knob to toggle
+
+  - id: topology_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 30, y: 82 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: decay_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 118, y: 82 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: pre_delay_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 30, y: 164 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: density_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 118, y: 164 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: spectral_tilt_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 228, y: 82 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: resonance_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 228, y: 164 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: mod_rate_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 338, y: 82 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: mod_depth_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 338, y: 164 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: width_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 620, y: 82 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+  - id: mix_lock
+    type: toggle
+    label: "Lock"
+    position: { x: 700, y: 82 }
+    size: { width: 56, height: 56 }
+    default: false
+    visual: knob_overlay
+
+# Layout section metadata (for code generation reference)
+sections:
+  - id: space
+    label: "SPACE"
+    accent_color: "#00d4ff"
+    x: 20
+    width: 174
+    description: "FDN reverb core parameters"
+
+  - id: spectral
+    label: "SPECTRAL"
+    accent_color: "#00d4ff"
+    x: 210
+    width: 94
+    description: "Per-band spectral shaping"
+
+  - id: motion
+    label: "MOTION"
+    accent_color: "#9b59b6"
+    x: 318
+    width: 94
+    description: "Modulation/LFO parameters"
+
+  - id: mutation
+    label: "MUTATION"
+    accent_color: "#888888"
+    x: 428
+    width: 152
+    description: "Timer and crossfade — always user-controlled"
+
+  - id: output
+    label: "OUTPUT"
+    accent_color: "#888888"
+    x: 604
+    width: 160
+    description: "Stereo width and dry/wet mix"
+
+styling:
+  colors:
+    background: "#141414"
+    surface: "#1e1e1e"
+    display: "#0e0e0e"
+    foreground: "#e0e0e0"
+    foreground_dim: "#888888"
+    accent_cyan: "#00d4ff"
+    accent_purple: "#9b59b6"
+    accent_neutral: "#888888"
+    countdown_normal: "#00d4ff"
+    countdown_warning: "#ff3333"
+    knob_track: "#2a2a2a"
+    knob_body: "#1e1e1e"
+    knob_locked_ring: "section accent (solid 360deg halo)"
+    divider: "#2e2e2e"
+
+  fonts:
+    primary: "'Inter', 'Helvetica Neue', Arial, sans-serif"
+    monospace: "'JetBrains Mono', 'Courier New', monospace"
+    label_size: "9px"
+    label_tracking: "0.12em"
+    label_transform: "uppercase"
+    countdown_size: "28px"
+    countdown_weight: "700"
+
+  knobs:
+    diameter: 56
+    arc_degrees: 270
+    arc_start_angle: 135
+    arc_end_angle: 405
+    arc_width: 3
+    body_color: "#1e1e1e"
+    body_border: "#2a2a2a"
+    arc_track_color: "#2a2a2a"
+    indicator_color: "section accent"
+    locked_ring_width: 3
+    locked_ring_style: "solid 360deg, glowing"
+    glow_blur: "8px"
+
+  header:
+    height: 54
+    background: "#0e0e0e"
+    title_font_size: "13px"
+    title_tracking: "0.25em"
+    tagline_font_size: "9px"
+    countdown_position: "right"
+
+  mutation_flash:
+    duration_ms: 400
+    color: "#ffffff"
+    opacity_peak: 0.15
+
+# JUCE parameter mapping
+parameter_ids:
+  # JUCE uses these exact strings for AudioProcessorValueTreeState
+  topology: "topology"
+  decay: "decay"
+  pre_delay: "preDelay"
+  density: "density"
+  spectral_tilt: "spectralTilt"
+  resonance: "resonance"
+  mod_rate: "modRate"
+  mod_depth: "modDepth"
+  mutation_interval: "mutationInterval"
+  crossfade_speed: "crossfadeSpeed"
+  width: "width"
+  mix: "mix"
+  topology_lock: "topologyLock"
+  decay_lock: "decayLock"
+  pre_delay_lock: "preDelayLock"
+  density_lock: "densityLock"
+  spectral_tilt_lock: "spectralTiltLock"
+  resonance_lock: "resonanceLock"
+  mod_rate_lock: "modRateLock"
+  mod_depth_lock: "modDepthLock"
+  width_lock: "widthLock"
+  mix_lock: "mixLock"

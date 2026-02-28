@@ -1,0 +1,12 @@
+{
+  "aesthetic_id": "nbs-pro-dark-001",
+  "name": "NBS Pro Dark",
+  "description": "Near-black mastering studio hardware with dual accent color coding (red/blue sections), backlit arc knobs, and SVG scope displays. Precision meets warmth.",
+  "created": "2026-02-27T00:00:00Z",
+  "source_plugin": "NBS_DynaDrive",
+  "source_mockup_version": "v8",
+  "vibe": "Dark, dense, powerful — hardware channel strip density with mastering-grade precision",
+  "mood": ["professional", "dark", "precise", "dense", "mastering", "studio", "compact"],
+  "best_for": "Saturation, dynamics, EQ, channel strips, mix bus processors, mastering tools",
+  "used_in_plugins": ["NBS_DynaDrive"]
+}

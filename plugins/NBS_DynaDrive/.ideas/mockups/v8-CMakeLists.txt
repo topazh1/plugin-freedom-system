@@ -1,0 +1,91 @@
+# ==============================================================================
+# NBS DynaDrive — CMakeLists.txt WebView Configuration Snippet
+# Generated: 2026-02-27
+# Source:    plugins/NBS_DynaDrive/.ideas/mockups/v8-CMakeLists.txt
+#
+# HOW TO USE THIS FILE:
+#   This snippet is APPENDED to (or merged into) the plugin's main CMakeLists.txt
+#   during Stage 3 (GUI) integration. It is not a standalone CMakeLists.txt.
+#
+# File layout expected in Source/:
+#   Source/ui/public/index.html                    ← copy from v8-ui.html
+#   Source/ui/public/js/juce/index.js              ← JUCE frontend library
+#   Source/ui/public/js/juce/check_native_interop.js ← JUCE interop check
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Plugin declaration — ensure these flags are present in juce_add_plugin()
+#
+#    If juce_add_plugin() is already present, ADD these two lines to it:
+#
+#    NEEDS_WEB_BROWSER TRUE    ← Required: enables WebView in VST3
+#    IS_SYNTH FALSE            ← DynaDrive is an effect (audio in/out)
+# ------------------------------------------------------------------------------
+# EXAMPLE juce_add_plugin block (merge with existing):
+#
+# juce_add_plugin(NBS_DynaDrive
+#     COMPANY_NAME                "NBS"
+#     PLUGIN_MANUFACTURER_CODE    Nbss
+#     PLUGIN_CODE                 DyDr
+#     FORMATS                     VST3 AU Standalone
+#     PRODUCT_NAME                "NBS DynaDrive"
+#     IS_SYNTH                    FALSE
+#     NEEDS_WEB_BROWSER           TRUE          # ← ADD THIS
+# )
+
+# ------------------------------------------------------------------------------
+# 2. Binary data target — bundles UI files into the plugin binary
+#
+#    MUST include all three files. Missing check_native_interop.js causes
+#    silent JUCE WebView bridge failure (UI loads but parameters frozen).
+# ------------------------------------------------------------------------------
+juce_add_binary_data(NBS_DynaDrive_UIResources
+    SOURCES
+        Source/ui/public/index.html
+        Source/ui/public/js/juce/index.js
+        Source/ui/public/js/juce/check_native_interop.js
+)
+
+# ------------------------------------------------------------------------------
+# 3. Target link libraries — append to the existing target_link_libraries block
+#
+#    juce::juce_gui_extra  is REQUIRED for WebBrowserComponent
+#    NBS_DynaDrive_UIResources links the binary data target
+# ------------------------------------------------------------------------------
+target_link_libraries(NBS_DynaDrive
+    PRIVATE
+        NBS_DynaDrive_UIResources       # UI HTML/JS bundled as binary data
+        juce::juce_audio_utils
+        juce::juce_dsp
+        juce::juce_gui_extra            # ← REQUIRED for WebBrowserComponent
+        juce::juce_audio_processors
+)
+
+# ------------------------------------------------------------------------------
+# 4. CRITICAL: Generate JuceHeader.h (JUCE 8 requirement)
+#    Must come AFTER target_link_libraries, BEFORE target_compile_definitions.
+# ------------------------------------------------------------------------------
+juce_generate_juce_header(NBS_DynaDrive)
+
+# ------------------------------------------------------------------------------
+# 5. Compile definitions — enable WebView and disable unnecessary CURL
+# ------------------------------------------------------------------------------
+target_compile_definitions(NBS_DynaDrive
+    PUBLIC
+        JUCE_WEB_BROWSER=1              # Enable WebView (WebBrowserComponent)
+        JUCE_USE_CURL=0                 # No CURL needed for local HTML resources
+        JUCE_VST3_CAN_REPLACE_VST2=0
+)
+
+# ------------------------------------------------------------------------------
+# VERIFICATION CHECKLIST (run after updating CMakeLists.txt):
+#
+#   cmake -B build -DCMAKE_BUILD_TYPE=Debug
+#   cmake --build build --target NBS_DynaDrive_Standalone -- -j$(nproc)
+#
+#   Expected: No "JuceHeader.h not found" error
+#   Expected: No "WebBrowserComponent not found" error
+#   Expected: Standalone launches and shows WebView (not blank)
+#   Expected: Console shows no "Failed to get slider state" errors
+#   Expected: window.__JUCE__ object exists in browser console
+# ------------------------------------------------------------------------------

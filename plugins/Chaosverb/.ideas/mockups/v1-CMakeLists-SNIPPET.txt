@@ -1,0 +1,81 @@
+# =============================================================================
+# Chaosverb — CMake WebView Configuration Snippet
+# Generated: 2026-02-27 from v1-ui.yaml
+#
+# INSTRUCTIONS FOR gui-agent (Stage 3):
+#
+# 1. Append the juce_add_plugin() flags to the existing juce_add_plugin() call.
+# 2. Add the juce_add_binary_data() block after juce_add_plugin().
+# 3. Append to the existing target_link_libraries() call.
+# 4. Append to the existing target_compile_definitions() call.
+# 5. Add juce_generate_juce_header() after target_link_libraries() (Pattern 1).
+#
+# This is NOT a standalone CMakeLists.txt — it is a snippet to be merged
+# into the existing CMakeLists.txt at plugins/Chaosverb/CMakeLists.txt.
+# =============================================================================
+
+# ─── ADD TO juce_add_plugin() CALL ───────────────────────────────────────────
+# Add these flags inside the existing juce_add_plugin(Chaosverb ...) call:
+
+    NEEDS_WEB_BROWSER TRUE          # Pattern 9: Required for VST3 WebView support
+
+# ─── juce_add_binary_data() BLOCK ────────────────────────────────────────────
+# Add this block AFTER juce_add_plugin():
+
+juce_add_binary_data(Chaosverb_UIResources
+    SOURCES
+        Source/ui/public/index.html
+        Source/ui/public/js/juce/index.js
+        Source/ui/public/js/juce/check_native_interop.js  # Pattern 13: Required
+)
+
+# ─── ADD TO target_link_libraries() CALL ─────────────────────────────────────
+# Add these to the existing target_link_libraries(Chaosverb ...) call:
+
+        Chaosverb_UIResources          # Binary HTML/JS resources
+        juce::juce_gui_extra           # Pattern 3: Required for WebBrowserComponent
+
+# ─── ADD TO target_compile_definitions() CALL ────────────────────────────────
+# Add these to the existing target_compile_definitions(Chaosverb ...) call:
+
+        JUCE_WEB_BROWSER=1             # Pattern 3: Enable WebView
+        JUCE_USE_CURL=0                # Disable CURL (not needed for local HTML)
+
+# ─── FULL EXAMPLE (Reference) ────────────────────────────────────────────────
+# Shown as a complete CMakeLists.txt excerpt for clarity.
+# Adapt variable names to match the actual Chaosverb CMakeLists.txt.
+
+# juce_add_plugin(Chaosverb
+#     COMPANY_NAME "NBS"
+#     PLUGIN_MANUFACTURER_CODE Mnbs
+#     PLUGIN_CODE Cvrb
+#     FORMATS VST3 AU Standalone
+#     PRODUCT_NAME "Chaosverb"
+#     NEEDS_WEB_BROWSER TRUE                         # ADD THIS
+# )
+#
+# juce_add_binary_data(Chaosverb_UIResources         # ADD THIS BLOCK
+#     SOURCES
+#         Source/ui/public/index.html
+#         Source/ui/public/js/juce/index.js
+#         Source/ui/public/js/juce/check_native_interop.js
+# )
+#
+# target_link_libraries(Chaosverb
+#     PRIVATE
+#         juce::juce_audio_processors
+#         juce::juce_audio_utils
+#         juce::juce_dsp
+#         juce::juce_gui_basics
+#         juce::juce_gui_extra           # ADD THIS
+#         Chaosverb_UIResources          # ADD THIS
+# )
+#
+# juce_generate_juce_header(Chaosverb)  # Pattern 1: Must come AFTER target_link_libraries
+#
+# target_compile_definitions(Chaosverb
+#     PUBLIC
+#         JUCE_VST3_CAN_REPLACE_VST2=0
+#         JUCE_WEB_BROWSER=1             # ADD THIS
+#         JUCE_USE_CURL=0                # ADD THIS
+# )

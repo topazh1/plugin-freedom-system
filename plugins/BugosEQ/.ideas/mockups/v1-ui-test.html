@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BugosEQ — 4-Band Dynamic EQ v1</title>
+  <style>
+    /* ================================================================
+       WEBVIEW FOUNDATION — Required constraints
+       ================================================================ */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+      overflow: hidden;
+      background: #2a1a0a;
+      color: #c49564;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      width: 820px;
+      height: 620px;
+    }
+
+    /* ================================================================
+       CSS VARIABLES — Vintage Hardware Palette
+       ================================================================ */
+    :root {
+      --bg-dark:            #2a1a0a;
+      --bg-mid:             #4a3a2a;
+      --bg-very-dark:       #1a0a00;
+      --bg-surface:         #3a2a1a;
+      --accent-brass-light: #d4a574;
+      --accent-brass:       #c49564;
+      --accent-brass-dark:  #a08050;
+      --accent-red:         #b8453d;
+      --text-primary:       #c49564;
+      --control-highlight:  #3a2a1a;
+      --control-mid:        #2f2015;
+      --control-dark:       #1a0a00;
+      --shadow-heavy:       rgba(0,0,0,0.8);
+      --shadow-medium:      rgba(0,0,0,0.6);
+      --brass-glow:         rgba(212,165,116,0.4);
+      --eq-display-bg:      #0e0804;
+      --global-section-bg:  #3a2410;
+      --band-divider:       #3a2a1a;
+    }
+
+    /* ================================================================
+       PLUGIN CONTAINER
+       ================================================================ */
+    .plugin-container {
+      position: relative;
+      width: 820px;
+      height: 620px;
+      background: var(--bg-dark);
+      overflow: hidden;
+    }
+
+    /* Scan line texture overlay */
+    .plugin-container::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.03) 3px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Radial vignette */
+    .plugin-container::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 50%,
+        rgba(0,0,0,0.30) 100%
+      );
+      pointer-events: none;
+      z-index: 101;
+    }
+
+    /* ================================================================
+       HEADER BAR — 40px
+       ================================================================ */
+    .header-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 820px;
+      height: 40px;
+      background: linear-gradient(180deg, #3a2a1a 0%, #2a1a0a 100%);
+      border-bottom: 1px solid #4a3a2a;
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      z-index: 10;
+    }
+
+    .plugin-title {
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--accent-brass-light);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(212,165,116,0.35);
+      flex-shrink: 0;
+    }
+
+    .header-spacer {
+      flex: 1;
+    }
+
+    /* Processing Mode Toggle (Stereo / M-S) */
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--accent-brass-dark);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-right: 20px;
+      flex-shrink: 0;
+    }
+
+    .mode-toggle-btn {
+      padding: 0 12px;
+      height: 24px;
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent-brass-dark);
+      background: var(--control-dark);
+      border: none;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      line-height: 24px;
+    }
+
+    .mode-toggle-btn:first-child {
+      border-right: 1px solid var(--accent-brass-dark);
+    }
+
+    .mode-toggle-btn.active {
+      background: var(--accent-brass);
+      color: var(--bg-very-dark);
+      font-weight: 700;
+    }
+
+    /* Header level meters */
+    .header-meters {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .header-meter-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .header-meter-label {
+      font-size: 7px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      color: var(--accent-brass-dark);
+      text-transform: uppercase;
+      width: 18px;
+    }
+
+    .level-meter {
+      position: relative;
+      width: 110px;
+      height: 8px;
+      background: #130a03;
+      border: 1px solid #2a1a0a;
+      border-radius: 1px;
+      overflow: hidden;
+    }
+
+    .level-meter-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: linear-gradient(
+        to right,
+        #6a8440 0%,
+        #8aad5a 40%,
+        #c49564 75%,
+        #d4894a 90%,
+        #b8453d 100%
+      );
+      transition: width 0.08s ease-out;
+    }
+
+    .level-meter-segments {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to right,
+        transparent 0px,
+        transparent 5px,
+        rgba(0,0,0,0.25) 5px,
+        rgba(0,0,0,0.25) 6px
+      );
+      pointer-events: none;
+    }
+
+    /* ================================================================
+       EQ DISPLAY — 160px
+       ================================================================ */
+    .eq-display {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 820px;
+      height: 160px;
+      background: #0a0603;
+      border-bottom: 1px solid #3a2a1a;
+    }
+
+    .eq-display-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .eq-display-label {
+      position: absolute;
+      bottom: 6px;
+      right: 10px;
+      font-size: 7px;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      color: #3a2a1a;
+      text-transform: uppercase;
+    }
+
+    /* ================================================================
+       BAND STRIPS CONTAINER — y=200, h=340
+       ================================================================ */
+    .band-strips {
+      position: absolute;
+      top: 200px;
+      left: 0;
+      width: 820px;
+      height: 340px;
+      display: flex;
+    }
+
+    /* ================================================================
+       SINGLE BAND STRIP — 205px wide
+       ================================================================ */
+    .band-strip {
+      position: relative;
+      width: 205px;
+      height: 340px;
+      background: var(--bg-dark);
+      border-right: 1px solid #3a2a1a;
+      flex-shrink: 0;
+    }
+
+    .band-strip:last-child {
+      border-right: none;
+      width: 204px;
+    }
+
+    /* Inner shadow on left side of each strip except first */
+    .band-strip + .band-strip::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to right, rgba(0,0,0,0.3), transparent);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Band label header */
+    .band-label {
+      text-align: center;
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--accent-brass);
+      padding-top: 12px;
+      padding-bottom: 6px;
+      text-shadow: 0 0 8px rgba(196,149,100,0.4);
+    }
+
+    /* ================================================================
+       MODE TOGGLE — 4-segment button group
+       ================================================================ */
+    .mode-selector {
+      display: flex;
+      margin: 0 8px 0 8px;
+      border: 1px solid #4a3a2a;
+      border-radius: 2px;
+      overflow: hidden;
+      height: 22px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: #1a0a00;
+      color: #6a5040;
+      font-size: 7px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+      border-right: 1px solid #3a2a1a;
+      line-height: 22px;
+      padding: 0;
+    }
+
+    .mode-btn:last-child {
+      border-right: none;
+    }
+
+    .mode-btn.active {
+      background: var(--accent-brass);
+      color: #1a0a00;
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .mode-btn:hover:not(.active) {
+      background: #2a1a0a;
+      color: #8a6a50;
+    }
+
+    /* ================================================================
+       CONTROL ROWS
+       ================================================================ */
+    .control-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .control-row.single {
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .control-row.dynamics {
+      margin-top: 10px;
+    }
+
+    /* ================================================================
+       KNOB COMPONENT
+       ================================================================ */
+    .knob-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+    }
+
+    .knob {
+      position: relative;
+      border-radius: 50%;
+      cursor: ns-resize;
+      flex-shrink: 0;
+      background: radial-gradient(
+        circle at 35% 30%,
+        #5a4030 0%,
+        #3a2a1a 30%,
+        #2f2015 55%,
+        #1a0a00 100%
+      );
+      box-shadow:
+        0 3px 8px rgba(0,0,0,0.8),
+        0 1px 2px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        inset 0 -1px 2px rgba(0,0,0,0.5);
+      transition: box-shadow 0.1s;
+    }
+
+    .knob:active {
+      box-shadow:
+        0 2px 5px rgba(0,0,0,0.8),
+        0 0 12px rgba(196,149,100,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        inset 0 -1px 2px rgba(0,0,0,0.5);
+    }
+
+    .knob-large {
+      width: 65px;
+      height: 65px;
+    }
+
+    .knob-medium {
+      width: 50px;
+      height: 50px;
+    }
+
+    .knob-small {
+      width: 38px;
+      height: 38px;
+    }
+
+    /* Outer ring / bezel */
+    .knob::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5a4a30 0%, #2a1a0a 50%, #1a0a00 100%);
+      z-index: -1;
+    }
+
+    /* Indicator bar */
+    .knob-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 3px;
+      border-radius: 1.5px;
+      background: linear-gradient(to bottom, var(--accent-brass-light), var(--accent-brass));
+      transform-origin: 50% 0%;
+      box-shadow: 0 0 4px rgba(212,165,116,0.6);
+    }
+
+    .knob-large .knob-indicator {
+      height: 22px;
+      margin-left: -1.5px;
+      margin-top: -22px;
+    }
+
+    .knob-medium .knob-indicator {
+      height: 17px;
+      margin-left: -1.5px;
+      margin-top: -17px;
+    }
+
+    .knob-small .knob-indicator {
+      height: 12px;
+      margin-left: -1.5px;
+      margin-top: -12px;
+    }
+
+    /* Parameter label below knob */
+    .knob-label {
+      font-size: 7px;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent-brass-dark);
+      text-align: center;
+    }
+
+    /* Value readout on hover */
+    .knob-value {
+      font-size: 7px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--accent-brass-light);
+      text-align: center;
+      min-height: 9px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .knob-wrapper:hover .knob-value,
+    .knob-wrapper.dragging .knob-value {
+      opacity: 1;
+    }
+
+    /* Dynamics controls — dimmed in static mode */
+    .dynamics-control {
+      transition: opacity 0.2s;
+    }
+
+    .dynamics-dimmed .dynamics-control {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* ================================================================
+       GR / GE METER BAR
+       ================================================================ */
+    .gr-meter-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 14px 10px 0 10px;
+    }
+
+    .gr-label {
+      font-size: 6px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      color: var(--accent-brass-dark);
+      text-transform: uppercase;
+      flex-shrink: 0;
+      width: 10px;
+    }
+
+    .gr-meter {
+      flex: 1;
+      height: 6px;
+      background: #130a03;
+      border: 1px solid #2a1a0a;
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Center line for 0 GR */
+    .gr-meter::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background: #3a2a1a;
+    }
+
+    .gr-meter-fill {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      transition: left 0.08s, width 0.08s;
+    }
+
+    .gr-meter-fill.positive {
+      background: linear-gradient(to right, #6a8440, #8aad5a);
+    }
+
+    .gr-meter-fill.negative {
+      background: linear-gradient(to left, #c49564, #a07040);
+    }
+
+    .gr-meter-segments {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to right,
+        transparent 0px,
+        transparent 7px,
+        rgba(0,0,0,0.3) 7px,
+        rgba(0,0,0,0.3) 8px
+      );
+    }
+
+    /* ================================================================
+       GLOBAL SECTION — y=540, h=80
+       ================================================================ */
+    .global-section {
+      position: absolute;
+      top: 540px;
+      left: 0;
+      width: 820px;
+      height: 80px;
+      background: var(--global-section-bg);
+      border-top: 1px solid #5a4a30;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 0;
+    }
+
+    /* Global section top inner highlight */
+    .global-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: rgba(196,149,100,0.15);
+    }
+
+    .global-cluster {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 0 24px;
+    }
+
+    .global-cluster-label {
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--accent-brass-dark);
+    }
+
+    .global-divider {
+      width: 1px;
+      height: 50px;
+      background: linear-gradient(to bottom, transparent, #4a3a2a, transparent);
+      flex-shrink: 0;
+    }
+
+    .global-meters-cluster {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-left: 24px;
+      flex: 1;
+    }
+
+    .global-meter-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .global-meter-label {
+      font-size: 7px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      color: var(--accent-brass-dark);
+      text-transform: uppercase;
+      width: 22px;
+      flex-shrink: 0;
+    }
+
+    .global-level-meter {
+      width: 160px;
+      height: 10px;
+      background: #130a03;
+      border: 1px solid #2a1a0a;
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .global-level-meter-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: linear-gradient(
+        to right,
+        #4a6a28 0%,
+        #6a8a40 35%,
+        #8aad5a 60%,
+        #c49564 80%,
+        #d4894a 92%,
+        #b8453d 100%
+      );
+      transition: width 0.08s ease-out;
+    }
+
+    .global-level-meter-segments {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to right,
+        transparent 0px,
+        transparent 7px,
+        rgba(0,0,0,0.3) 7px,
+        rgba(0,0,0,0.3) 8px
+      );
+    }
+
+    /* ================================================================
+       SECTION DIVIDER LINES between EQ display and bands
+       ================================================================ */
+    .section-divider {
+      position: absolute;
+      left: 0;
+      width: 820px;
+      height: 1px;
+      background: #3a2a1a;
+    }
+
+    /* ================================================================
+       CANVAS — EQ display drawing target
+       ================================================================ */
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<div class="plugin-container" id="plugin">
+
+  <!-- ═══════════════════════════════════════════
+       HEADER BAR
+       ═══════════════════════════════════════════ -->
+  <div class="header-bar">
+    <span class="plugin-title">Bugos EQ</span>
+    <div class="header-spacer"></div>
+
+    <!-- Processing mode toggle -->
+    <div class="mode-toggle" id="processingModeToggle">
+      <button class="mode-toggle-btn active" data-value="0" onclick="setProcessingMode(0)">Stereo</button>
+      <button class="mode-toggle-btn" data-value="1" onclick="setProcessingMode(1)">M-S</button>
+    </div>
+
+    <!-- Header level meters -->
+    <div class="header-meters">
+      <div class="header-meter-row">
+        <span class="header-meter-label">In</span>
+        <div class="level-meter">
+          <div class="level-meter-fill" id="headerInputMeter" style="width: 62%"></div>
+          <div class="level-meter-segments"></div>
+        </div>
+      </div>
+      <div class="header-meter-row">
+        <span class="header-meter-label">Out</span>
+        <div class="level-meter">
+          <div class="level-meter-fill" id="headerOutputMeter" style="width: 55%"></div>
+          <div class="level-meter-segments"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       EQ DISPLAY
+       ═══════════════════════════════════════════ -->
+  <div class="eq-display">
+    <canvas class="eq-display-canvas" id="eqCanvas" width="820" height="160"></canvas>
+    <span class="eq-display-label">EQ Display</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BAND STRIPS
+       ═══════════════════════════════════════════ -->
+  <div class="band-strips">
+
+    <!-- ─── BAND 1: LF SHELF ─── -->
+    <div class="band-strip" id="band1-strip" data-band="1">
+      <div class="band-label">LF Shelf</div>
+
+      <div class="mode-selector" id="band1-mode-selector">
+        <button class="mode-btn active" data-band="1" data-value="0" onclick="setBandMode(1,0)">Static</button>
+        <button class="mode-btn" data-band="1" data-value="1" onclick="setBandMode(1,1)">Exp</button>
+        <button class="mode-btn" data-band="1" data-value="2" onclick="setBandMode(1,2)">Up</button>
+        <button class="mode-btn" data-band="1" data-value="3" onclick="setBandMode(1,3)">Dn</button>
+      </div>
+
+      <div class="control-row">
+        <div class="knob-wrapper" data-param="band1_freq" data-min="20" data-max="20000" data-default="80" data-value="80">
+          <div class="knob knob-medium" id="knob-band1_freq">
+            <div class="knob-indicator" style="transform: rotate(-135deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Freq</span>
+          <span class="knob-value" id="val-band1_freq">80 Hz</span>
+        </div>
+        <div class="knob-wrapper" data-param="band1_gain" data-min="-18" data-max="18" data-default="0" data-value="0">
+          <div class="knob knob-medium" id="knob-band1_gain">
+            <div class="knob-indicator" style="transform: rotate(0deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Gain</span>
+          <span class="knob-value" id="val-band1_gain">0.0 dB</span>
+        </div>
+      </div>
+
+      <div class="control-row single">
+        <div class="knob-wrapper" data-param="band1_q" data-min="0.1" data-max="10" data-default="0.7" data-value="0.7">
+          <div class="knob knob-small" id="knob-band1_q">
+            <div class="knob-indicator" style="transform: rotate(-126deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Q</span>
+          <span class="knob-value" id="val-band1_q">0.7</span>
+        </div>
+      </div>
+
+      <div class="control-row dynamics" id="band1-dynamics">
+        <div class="knob-wrapper dynamics-control" data-param="band1_threshold" data-min="-60" data-max="0" data-default="-24" data-value="-24">
+          <div class="knob knob-small" id="knob-band1_threshold">
+            <div class="knob-indicator" style="transform: rotate(-54deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Thr</span>
+          <span class="knob-value" id="val-band1_threshold">-24 dBFS</span>
+        </div>
+        <div class="knob-wrapper dynamics-control" data-param="band1_ratio" data-min="1" data-max="20" data-default="4" data-value="4">
+          <div class="knob knob-small" id="knob-band1_ratio">
+            <div class="knob-indicator" style="transform: rotate(-98deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Ratio</span>
+          <span class="knob-value" id="val-band1_ratio">4.0 : 1</span>
+        </div>
+      </div>
+
+      <div class="control-row dynamics" id="band1-dynamics2">
+        <div class="knob-wrapper dynamics-control" data-param="band1_attack" data-min="0.1" data-max="300" data-default="10" data-value="10">
+          <div class="knob knob-small" id="knob-band1_attack">
+            <div class="knob-indicator" style="transform: rotate(-117deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Atck</span>
+          <span class="knob-value" id="val-band1_attack">10 ms</span>
+        </div>
+        <div class="knob-wrapper dynamics-control" data-param="band1_release" data-min="5" data-max="2000" data-default="100" data-value="100">
+          <div class="knob knob-small" id="knob-band1_release">
+            <div class="knob-indicator" style="transform: rotate(-91deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Rel</span>
+          <span class="knob-value" id="val-band1_release">100 ms</span>
+        </div>
+      </div>
+
+      <div class="gr-meter-row">
+        <span class="gr-label">GR</span>
+        <div class="gr-meter" id="gr-meter-1">
+          <div class="gr-meter-fill negative" id="gr-fill-1" style="right: 50%; left: 38%; width: 12%"></div>
+          <div class="gr-meter-segments"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── BAND 2: LO MID ─── -->
+    <div class="band-strip" id="band2-strip" data-band="2">
+      <div class="band-label">Lo Mid</div>
+
+      <div class="mode-selector" id="band2-mode-selector">
+        <button class="mode-btn active" data-band="2" data-value="0" onclick="setBandMode(2,0)">Static</button>
+        <button class="mode-btn" data-band="2" data-value="1" onclick="setBandMode(2,1)">Exp</button>
+        <button class="mode-btn" data-band="2" data-value="2" onclick="setBandMode(2,2)">Up</button>
+        <button class="mode-btn" data-band="2" data-value="3" onclick="setBandMode(2,3)">Dn</button>
+      </div>
+
+      <div class="control-row">
+        <div class="knob-wrapper" data-param="band2_freq" data-min="20" data-max="20000" data-default="400" data-value="400">
+          <div class="knob knob-medium" id="knob-band2_freq">
+            <div class="knob-indicator" style="transform: rotate(-96deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Freq</span>
+          <span class="knob-value" id="val-band2_freq">400 Hz</span>
+        </div>
+        <div class="knob-wrapper" data-param="band2_gain" data-min="-18" data-max="18" data-default="0" data-value="0">
+          <div class="knob knob-medium" id="knob-band2_gain">
+            <div class="knob-indicator" style="transform: rotate(0deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Gain</span>
+          <span class="knob-value" id="val-band2_gain">0.0 dB</span>
+        </div>
+      </div>
+
+      <div class="control-row single">
+        <div class="knob-wrapper" data-param="band2_q" data-min="0.1" data-max="10" data-default="1.0" data-value="1.0">
+          <div class="knob knob-small" id="knob-band2_q">
+            <div class="knob-indicator" style="transform: rotate(-121deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Q</span>
+          <span class="knob-value" id="val-band2_q">1.0</span>
+        </div>
+      </div>
+
+      <div class="control-row dynamics" id="band2-dynamics">
+        <div class="knob-wrapper dynamics-control" data-param="band2_threshold" data-min="-60" data-max="0" data-default="-24" data-value="-24">
+          <div class="knob knob-small" id="knob-band2_threshold">
+            <div class="knob-indicator" style="transform: rotate(-54deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Thr</span>
+          <span class="knob-value" id="val-band2_threshold">-24 dBFS</span>
+        </div>
+        <div class="knob-wrapper dynamics-control" data-param="band2_ratio" data-min="1" data-max="20" data-default="4" data-value="4">
+          <div class="knob knob-small" id="knob-band2_ratio">
+            <div class="knob-indicator" style="transform: rotate(-98deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Ratio</span>
+          <span class="knob-value" id="val-band2_ratio">4.0 : 1</span>
+        </div>
+      </div>
+
+      <div class="control-row dynamics" id="band2-dynamics2">
+        <div class="knob-wrapper dynamics-control" data-param="band2_attack" data-min="0.1" data-max="300" data-default="10" data-value="10">
+          <div class="knob knob-small" id="knob-band2_attack">
+            <div class="knob-indicator" style="transform: rotate(-117deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Atck</span>
+          <span class="knob-value" id="val-band2_attack">10 ms</span>
+        </div>
+        <div class="knob-wrapper dynamics-control" data-param="band2_release" data-min="5" data-max="2000" data-default="100" data-value="100">
+          <div class="knob knob-small" id="knob-band2_release">
+            <div class="knob-indicator" style="transform: rotate(-91deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Rel</span>
+          <span class="knob-value" id="val-band2_release">100 ms</span>
+        </div>
+      </div>
+
+      <div class="gr-meter-row">
+        <span class="gr-label">GR</span>
+        <div class="gr-meter" id="gr-meter-2">
+          <div class="gr-meter-fill negative" id="gr-fill-2" style="left: 40%; width: 10%"></div>
+          <div class="gr-meter-segments"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── BAND 3: HI MID ─── -->
+    <div class="band-strip" id="band3-strip" data-band="3">
+      <div class="band-label">Hi Mid</div>
+
+      <div class="mode-selector" id="band3-mode-selector">
+        <button class="mode-btn active" data-band="3" data-value="0" onclick="setBandMode(3,0)">Static</button>
+        <button class="mode-btn" data-band="3" data-value="1" onclick="setBandMode(3,1)">Exp</button>
+        <button class="mode-btn" data-band="3" data-value="2" onclick="setBandMode(3,2)">Up</button>
+        <button class="mode-btn" data-band="3" data-value="3" onclick="setBandMode(3,3)">Dn</button>
+      </div>
+
+      <div class="control-row">
+        <div class="knob-wrapper" data-param="band3_freq" data-min="20" data-max="20000" data-default="2500" data-value="2500">
+          <div class="knob knob-medium" id="knob-band3_freq">
+            <div class="knob-indicator" style="transform: rotate(-47deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Freq</span>
+          <span class="knob-value" id="val-band3_freq">2.5 kHz</span>
+        </div>
+        <div class="knob-wrapper" data-param="band3_gain" data-min="-18" data-max="18" data-default="0" data-value="0">
+          <div class="knob knob-medium" id="knob-band3_gain">
+            <div class="knob-indicator" style="transform: rotate(0deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Gain</span>
+          <span class="knob-value" id="val-band3_gain">0.0 dB</span>
+        </div>
+      </div>
+
+      <div class="control-row single">
+        <div class="knob-wrapper" data-param="band3_q" data-min="0.1" data-max="10" data-default="1.0" data-value="1.0">
+          <div class="knob knob-small" id="knob-band3_q">
+            <div class="knob-indicator" style="transform: rotate(-121deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Q</span>
+          <span class="knob-value" id="val-band3_q">1.0</span>
+        </div>
+      </div>
+
+      <div class="control-row dynamics" id="band3-dynamics">
+        <div class="knob-wrapper dynamics-control" data-param="band3_threshold" data-min="-60" data-max="0" data-default="-24" data-value="-24">
+          <div class="knob knob-small" id="knob-band3_threshold">
+            <div class="knob-indicator" style="transform: rotate(-54deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Thr</span>
+          <span class="knob-value" id="val-band3_threshold">-24 dBFS</span>
+        </div>
+        <div class="knob-wrapper dynamics-control" data-param="band3_ratio" data-min="1" data-max="20" data-default="4" data-value="4">
+          <div class="knob knob-small" id="knob-band3_ratio">
+            <div class="knob-indicator" style="transform: rotate(-98deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Ratio</span>
+          <span class="knob-value" id="val-band3_ratio">4.0 : 1</span>
+        </div>
+      </div>
+
+      <div class="control-row dynamics" id="band3-dynamics2">
+        <div class="knob-wrapper dynamics-control" data-param="band3_attack" data-min="0.1" data-max="300" data-default="10" data-value="10">
+          <div class="knob knob-small" id="knob-band3_attack">
+            <div class="knob-indicator" style="transform: rotate(-117deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Atck</span>
+          <span class="knob-value" id="val-band3_attack">10 ms</span>
+        </div>
+        <div class="knob-wrapper dynamics-control" data-param="band3_release" data-min="5" data-max="2000" data-default="100" data-value="100">
+          <div class="knob knob-small" id="knob-band3_release">
+            <div class="knob-indicator" style="transform: rotate(-91deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Rel</span>
+          <span class="knob-value" id="val-band3_release">100 ms</span>
+        </div>
+      </div>
+
+      <div class="gr-meter-row">
+        <span class="gr-label">GR</span>
+        <div class="gr-meter" id="gr-meter-3">
+          <div class="gr-meter-fill negative" id="gr-fill-3" style="left: 42%; width: 8%"></div>
+          <div class="gr-meter-segments"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── BAND 4: HF SHELF ─── -->
+    <div class="band-strip" id="band4-strip" data-band="4">
+      <div class="band-label">HF Shelf</div>
+
+      <div class="mode-selector" id="band4-mode-selector">
+        <button class="mode-btn active" data-band="4" data-value="0" onclick="setBandMode(4,0)">Static</button>
+        <button class="mode-btn" data-band="4" data-value="1" onclick="setBandMode(4,1)">Exp</button>
+        <button class="mode-btn" data-band="4" data-value="2" onclick="setBandMode(4,2)">Up</button>
+        <button class="mode-btn" data-band="4" data-value="3" onclick="setBandMode(4,3)">Dn</button>
+      </div>
+
+      <div class="control-row">
+        <div class="knob-wrapper" data-param="band4_freq" data-min="20" data-max="20000" data-default="10000" data-value="10000">
+          <div class="knob knob-medium" id="knob-band4_freq">
+            <div class="knob-indicator" style="transform: rotate(102deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Freq</span>
+          <span class="knob-value" id="val-band4_freq">10 kHz</span>
+        </div>
+        <div class="knob-wrapper" data-param="band4_gain" data-min="-18" data-max="18" data-default="0" data-value="0">
+          <div class="knob knob-medium" id="knob-band4_gain">
+            <div class="knob-indicator" style="transform: rotate(0deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Gain</span>
+          <span class="knob-value" id="val-band4_gain">0.0 dB</span>
+        </div>
+      </div>
+
+      <div class="control-row single">
+        <div class="knob-wrapper" data-param="band4_q" data-min="0.1" data-max="10" data-default="0.7" data-value="0.7">
+          <div class="knob knob-small" id="knob-band4_q">
+            <div class="knob-indicator" style="transform: rotate(-126deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Q</span>
+          <span class="knob-value" id="val-band4_q">0.7</span>
+        </div>
+      </div>
+
+      <div class="control-row dynamics" id="band4-dynamics">
+        <div class="knob-wrapper dynamics-control" data-param="band4_threshold" data-min="-60" data-max="0" data-default="-24" data-value="-24">
+          <div class="knob knob-small" id="knob-band4_threshold">
+            <div class="knob-indicator" style="transform: rotate(-54deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Thr</span>
+          <span class="knob-value" id="val-band4_threshold">-24 dBFS</span>
+        </div>
+        <div class="knob-wrapper dynamics-control" data-param="band4_ratio" data-min="1" data-max="20" data-default="4" data-value="4">
+          <div class="knob knob-small" id="knob-band4_ratio">
+            <div class="knob-indicator" style="transform: rotate(-98deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Ratio</span>
+          <span class="knob-value" id="val-band4_ratio">4.0 : 1</span>
+        </div>
+      </div>
+
+      <div class="control-row dynamics" id="band4-dynamics2">
+        <div class="knob-wrapper dynamics-control" data-param="band4_attack" data-min="0.1" data-max="300" data-default="10" data-value="10">
+          <div class="knob knob-small" id="knob-band4_attack">
+            <div class="knob-indicator" style="transform: rotate(-117deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Atck</span>
+          <span class="knob-value" id="val-band4_attack">10 ms</span>
+        </div>
+        <div class="knob-wrapper dynamics-control" data-param="band4_release" data-min="5" data-max="2000" data-default="100" data-value="100">
+          <div class="knob knob-small" id="knob-band4_release">
+            <div class="knob-indicator" style="transform: rotate(-91deg) translateY(-50%)"></div>
+          </div>
+          <span class="knob-label">Rel</span>
+          <span class="knob-value" id="val-band4_release">100 ms</span>
+        </div>
+      </div>
+
+      <div class="gr-meter-row">
+        <span class="gr-label">GR</span>
+        <div class="gr-meter" id="gr-meter-4">
+          <div class="gr-meter-fill negative" id="gr-fill-4" style="left: 44%; width: 6%"></div>
+          <div class="gr-meter-segments"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end band-strips -->
+
+  <!-- ═══════════════════════════════════════════
+       GLOBAL SECTION
+       ═══════════════════════════════════════════ -->
+  <div class="global-section">
+
+    <!-- DRIVE -->
+    <div class="global-cluster">
+      <div class="knob-wrapper" data-param="drive" data-min="0" data-max="100" data-default="20" data-value="20">
+        <div class="knob knob-large" id="knob-drive">
+          <div class="knob-indicator" style="transform: rotate(-99deg) translateY(-50%)"></div>
+        </div>
+        <span class="knob-label">Drive</span>
+        <span class="knob-value" id="val-drive">20%</span>
+      </div>
+    </div>
+
+    <div class="global-divider"></div>
+
+    <!-- OUTPUT GAIN -->
+    <div class="global-cluster">
+      <div class="knob-wrapper" data-param="output_gain" data-min="-18" data-max="18" data-default="0" data-value="0">
+        <div class="knob knob-large" id="knob-output_gain">
+          <div class="knob-indicator" style="transform: rotate(0deg) translateY(-50%)"></div>
+        </div>
+        <span class="knob-label">Output</span>
+        <span class="knob-value" id="val-output_gain">0.0 dB</span>
+      </div>
+    </div>
+
+    <div class="global-divider"></div>
+
+    <!-- INPUT / OUTPUT METERS -->
+    <div class="global-meters-cluster">
+      <div class="global-meter-row">
+        <span class="global-meter-label">Input</span>
+        <div class="global-level-meter">
+          <div class="global-level-meter-fill" id="globalInputMeter" style="width: 62%"></div>
+          <div class="global-level-meter-segments"></div>
+        </div>
+      </div>
+      <div class="global-meter-row">
+        <span class="global-meter-label">Output</span>
+        <div class="global-level-meter">
+          <div class="global-level-meter-fill" id="globalOutputMeter" style="width: 55%"></div>
+          <div class="global-level-meter-segments"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end global-section -->
+
+</div><!-- end plugin-container -->
+
+<script>
+  // ================================================================
+  //  MOCK JUCE BACKEND — Simulates JUCE WebView bridge for testing
+  // ================================================================
+  window.Juce = {
+    getSliderState: (id) => ({
+      normalisedValue: 0.5,
+      valueChangedEvent: {
+        addListener: (fn) => console.log("[Juce] Listener added for slider:", id)
+      },
+      setNormalisedValue: (v) => console.log("[Juce] setNormalisedValue:", id, v)
+    }),
+    getToggleState: (id) => ({
+      value: false,
+      valueChangedEvent: {
+        addListener: (fn) => console.log("[Juce] Listener added for toggle:", id)
+      },
+      setValue: (v) => console.log("[Juce] setValue:", id, v)
+    }),
+    getComboBoxState: (id) => ({
+      getChoiceAsValue: () => 0,
+      valueChangedEvent: {
+        addListener: (fn) => console.log("[Juce] Listener added for combo:", id)
+      },
+      setChoiceAsValue: (v) => console.log("[Juce] setChoiceAsValue:", id, v)
+    })
+  };
+
+  // Disable context menu (REQUIRED for WebView plugins)
+  document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    return false;
+  });
+
+  // ================================================================
+  //  PARAMETER STATE
+  // ================================================================
+  const paramState = {
+    processing_mode: 0,
+    drive: 20,
+    output_gain: 0,
+    band1_mode: 0, band1_freq: 80,   band1_gain: 0, band1_q: 0.7,  band1_threshold: -24, band1_ratio: 4, band1_attack: 10, band1_release: 100,
+    band2_mode: 0, band2_freq: 400,  band2_gain: 0, band2_q: 1.0,  band2_threshold: -24, band2_ratio: 4, band2_attack: 10, band2_release: 100,
+    band3_mode: 0, band3_freq: 2500, band3_gain: 0, band3_q: 1.0,  band3_threshold: -24, band3_ratio: 4, band3_attack: 10, band3_release: 100,
+    band4_mode: 0, band4_freq:10000, band4_gain: 0, band4_q: 0.7,  band4_threshold: -24, band4_ratio: 4, band4_attack: 10, band4_release: 100,
+  };
+
+  // ================================================================
+  //  KNOB ROTATION MATH
+  //  Travel: -135deg (min) to +135deg (max), total 270deg
+  // ================================================================
+  function normToAngle(norm) {
+    return -135 + norm * 270;
+  }
+
+  function paramToNorm(value, min, max) {
+    return Math.max(0, Math.min(1, (value - min) / (max - min)));
+  }
+
+  function normToParam(norm, min, max) {
+    return min + norm * (max - min);
+  }
+
+  function updateKnobAngle(paramId, value) {
+    const wrapper = document.querySelector(`[data-param="${paramId}"]`);
+    if (!wrapper) return;
+    const min = parseFloat(wrapper.dataset.min);
+    const max = parseFloat(wrapper.dataset.max);
+    const norm = paramToNorm(value, min, max);
+    const angle = normToAngle(norm);
+    const indicator = wrapper.querySelector(".knob-indicator");
+    if (indicator) {
+      indicator.style.transform = `rotate(${angle}deg) translateY(-50%)`;
+    }
+  }
+
+  // ================================================================
+  //  VALUE FORMATTING
+  // ================================================================
+  function formatParamValue(paramId, value) {
+    if (paramId.includes("freq")) {
+      if (value >= 1000) return `${(value/1000).toFixed(1)} kHz`;
+      return `${Math.round(value)} Hz`;
+    }
+    if (paramId.includes("gain") || paramId === "output_gain") return `${value >= 0 ? "+" : ""}${value.toFixed(1)} dB`;
+    if (paramId.includes("threshold")) return `${value.toFixed(0)} dBFS`;
+    if (paramId.includes("ratio")) return `${value.toFixed(1)} : 1`;
+    if (paramId.includes("attack")) return `${value.toFixed(1)} ms`;
+    if (paramId.includes("release")) return `${value.toFixed(0)} ms`;
+    if (paramId === "drive") return `${Math.round(value)}%`;
+    if (paramId.includes("_q") || paramId === "band1_q" || paramId === "band4_q") return value.toFixed(2);
+    return value.toFixed(2);
+  }
+
+  function updateValueDisplay(paramId, value) {
+    const el = document.getElementById(`val-${paramId}`);
+    if (el) el.textContent = formatParamValue(paramId, value);
+    paramState[paramId] = value;
+  }
+
+  // ================================================================
+  //  KNOB DRAG INTERACTION
+  // ================================================================
+  let activeKnob = null;
+  let dragStartY = 0;
+  let dragStartNorm = 0;
+
+  document.addEventListener("mousedown", (e) => {
+    const knob = e.target.closest(".knob");
+    if (!knob) return;
+    const wrapper = knob.parentElement;
+    if (!wrapper || !wrapper.dataset.param) return;
+
+    const paramId = wrapper.dataset.param;
+    const min = parseFloat(wrapper.dataset.min);
+    const max = parseFloat(wrapper.dataset.max);
+    const currentVal = paramState[paramId] !== undefined ? paramState[paramId] : parseFloat(wrapper.dataset.default);
+    const norm = paramToNorm(currentVal, min, max);
+
+    activeKnob = { wrapper, paramId, min, max };
+    dragStartY = e.clientY;
+    dragStartNorm = norm;
+
+    wrapper.classList.add("dragging");
+    e.preventDefault();
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!activeKnob) return;
+    const { wrapper, paramId, min, max } = activeKnob;
+
+    // Sensitivity: 200px drag = full range. Shift key = fine adjustment
+    const sensitivity = e.shiftKey ? 800 : 200;
+    const delta = (dragStartY - e.clientY) / sensitivity;
+    const newNorm = Math.max(0, Math.min(1, dragStartNorm + delta));
+    const newVal = normToParam(newNorm, min, max);
+
+    const indicator = wrapper.querySelector(".knob-indicator");
+    if (indicator) {
+      indicator.style.transform = `rotate(${normToAngle(newNorm)}deg) translateY(-50%)`;
+    }
+    updateValueDisplay(paramId, newVal);
+
+    // Notify mock Juce
+    const sliderState = window.Juce.getSliderState(paramId);
+    sliderState.setNormalisedValue(newNorm);
+    console.log(`[Param] ${paramId} = ${formatParamValue(paramId, newVal)} (norm=${newNorm.toFixed(3)})`);
+
+    // Live EQ display update if frequency or gain changed
+    if (paramId.includes("freq") || paramId.includes("gain")) {
+      drawEQCurve();
+    }
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (activeKnob) {
+      activeKnob.wrapper.classList.remove("dragging");
+      activeKnob = null;
+    }
+  });
+
+  // ================================================================
+  //  PROCESSING MODE TOGGLE
+  // ================================================================
+  function setProcessingMode(value) {
+    paramState.processing_mode = value;
+    document.querySelectorAll(".mode-toggle-btn").forEach(btn => {
+      btn.classList.toggle("active", parseInt(btn.dataset.value) === value);
+    });
+    console.log("[Param] processing_mode =", value === 0 ? "Stereo" : "M-S");
+    window.Juce.getComboBoxState("processing_mode").setChoiceAsValue(value);
+  }
+
+  // ================================================================
+  //  BAND MODE TOGGLE
+  // ================================================================
+  function setBandMode(band, value) {
+    const paramId = `band${band}_mode`;
+    paramState[paramId] = value;
+
+    // Update button active states
+    const selector = document.getElementById(`band${band}-mode-selector`);
+    if (selector) {
+      selector.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.classList.toggle("active", parseInt(btn.dataset.value) === value);
+      });
+    }
+
+    // Dim / undim dynamics controls
+    const strip = document.getElementById(`band${band}-strip`);
+    if (strip) {
+      const dynRows = strip.querySelectorAll("[id^='band'][id$='-dynamics'], [id^='band'][id$='-dynamics2']");
+      dynRows.forEach(row => {
+        row.classList.toggle("dynamics-dimmed", value === 0);
+      });
+    }
+
+    const modeLabels = ["Static", "Expander", "UpComp", "DnComp"];
+    console.log(`[Param] band${band}_mode = ${value} (${modeLabels[value]})`);
+    window.Juce.getComboBoxState(paramId).setChoiceAsValue(value);
+  }
+
+  // ================================================================
+  //  EQ DISPLAY — Canvas drawing
+  // ================================================================
+  const eqCanvas = document.getElementById("eqCanvas");
+  const ctx = eqCanvas.getContext("2d");
+
+  // Band colors — slight brass opacity variation to distinguish bands
+  const bandColors = [
+    "rgba(212,165,116,0.90)",  // Band 1 — warmest brass
+    "rgba(196,149,100,0.80)",  // Band 2
+    "rgba(180,133,84,0.75)",   // Band 3
+    "rgba(164,117,70,0.70)",   // Band 4 — darkest
+  ];
+
+  const bandFillColors = [
+    "rgba(212,165,116,0.08)",
+    "rgba(196,149,100,0.07)",
+    "rgba(180,133,84,0.06)",
+    "rgba(164,117,70,0.05)",
+  ];
+
+  // Frequency axis: log scale 20Hz – 20kHz mapped to canvas x
+  function freqToX(freq, width) {
+    const logMin = Math.log10(20);
+    const logMax = Math.log10(20000);
+    return ((Math.log10(freq) - logMin) / (logMax - logMin)) * width;
+  }
+
+  // dB axis: -18 to +18 dB mapped to canvas y
+  function gainToY(db, height) {
+    return height / 2 - (db / 18) * (height / 2 - 14);
+  }
+
+  // Draw low shelf response curve
+  function drawLowShelf(ctx, freq, gainDB, q, color, fillColor, w, h) {
+    ctx.beginPath();
+    let started = false;
+    for (let px = 0; px < w; px++) {
+      const f = 20 * Math.pow(1000, px / w);
+      // Simplified shelf curve approximation
+      const ratio = f / freq;
+      const shelf = gainDB / (1 + Math.pow(ratio * q, 2));
+      const y = gainToY(shelf, h);
+      if (!started) { ctx.moveTo(px, y); started = true; }
+      else ctx.lineTo(px, y);
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.lineTo(w, h/2);
+    ctx.lineTo(0, h/2);
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+  }
+
+  // Draw peak/bell response
+  function drawPeakBell(ctx, freq, gainDB, q, color, fillColor, w, h) {
+    ctx.beginPath();
+    let started = false;
+    for (let px = 0; px < w; px++) {
+      const f = 20 * Math.pow(1000, px / w);
+      const ratio = f / freq;
+      const denom = 1 + Math.pow(q * (ratio - 1/ratio), 2);
+      const boost = gainDB / denom;
+      const y = gainToY(boost, h);
+      if (!started) { ctx.moveTo(px, y); started = true; }
+      else ctx.lineTo(px, y);
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.lineTo(w, h/2);
+    ctx.lineTo(0, h/2);
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+  }
+
+  // Draw high shelf
+  function drawHighShelf(ctx, freq, gainDB, q, color, fillColor, w, h) {
+    ctx.beginPath();
+    let started = false;
+    for (let px = 0; px < w; px++) {
+      const f = 20 * Math.pow(1000, px / w);
+      const ratio = freq / f;
+      const shelf = gainDB / (1 + Math.pow(ratio * q, 2));
+      const y = gainToY(shelf, h);
+      if (!started) { ctx.moveTo(px, y); started = true; }
+      else ctx.lineTo(px, y);
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.lineTo(w, h/2);
+    ctx.lineTo(0, h/2);
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+  }
+
+  function drawEQCurve() {
+    const w = eqCanvas.width;
+    const h = eqCanvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = "#0a0603";
+    ctx.fillRect(0, 0, w, h);
+
+    // Frequency grid lines
+    const freqLines = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+    const freqLabelLines = [20, 100, 1000, 10000, 20000];
+    ctx.strokeStyle = "#241408";
+    ctx.lineWidth = 1;
+    freqLines.forEach(f => {
+      const x = freqToX(f, w);
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    });
+
+    // dB grid lines
+    const dbLines = [-18, -12, -6, 0, 6, 12, 18];
+    dbLines.forEach(db => {
+      const y = gainToY(db, h);
+      ctx.beginPath();
+      ctx.strokeStyle = db === 0 ? "#3a2a1a" : "#1e1008";
+      ctx.lineWidth = db === 0 ? 1 : 1;
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    });
+
+    // Frequency axis labels
+    ctx.font = "500 8px Helvetica Neue, Helvetica, Arial, sans-serif";
+    ctx.fillStyle = "#3a2a1a";
+    ctx.textAlign = "center";
+    const freqDisplayLabels = { 20: "20", 100: "100", 1000: "1k", 10000: "10k", 20000: "20k" };
+    freqLabelLines.forEach(f => {
+      const x = freqToX(f, w);
+      ctx.fillText(freqDisplayLabels[f], x, h - 4);
+    });
+
+    // dB labels
+    ctx.textAlign = "left";
+    [-12, -6, 6, 12].forEach(db => {
+      const y = gainToY(db, h);
+      ctx.fillStyle = "#2a1a0a";
+      ctx.fillText(`${db > 0 ? "+" : ""}${db}`, 3, y - 1);
+    });
+
+    // Draw band curves (back to front — band 4 first, band 1 on top)
+    ctx.save();
+    // Band 4 — HF Shelf
+    drawHighShelf(ctx, paramState.band4_freq, paramState.band4_gain, paramState.band4_q,
+      bandColors[3], bandFillColors[3], w, h);
+    // Band 3 — Hi Mid Bell
+    drawPeakBell(ctx, paramState.band3_freq, paramState.band3_gain, paramState.band3_q,
+      bandColors[2], bandFillColors[2], w, h);
+    // Band 2 — Lo Mid Bell
+    drawPeakBell(ctx, paramState.band2_freq, paramState.band2_gain, paramState.band2_q,
+      bandColors[1], bandFillColors[1], w, h);
+    // Band 1 — LF Shelf
+    drawLowShelf(ctx, paramState.band1_freq, paramState.band1_gain, paramState.band1_q,
+      bandColors[0], bandFillColors[0], w, h);
+    ctx.restore();
+
+    // Band frequency markers (small dots at center frequencies)
+    const bands = [
+      { freq: paramState.band1_freq, gain: paramState.band1_gain, color: bandColors[0] },
+      { freq: paramState.band2_freq, gain: paramState.band2_gain, color: bandColors[1] },
+      { freq: paramState.band3_freq, gain: paramState.band3_gain, color: bandColors[2] },
+      { freq: paramState.band4_freq, gain: paramState.band4_gain, color: bandColors[3] },
+    ];
+
+    bands.forEach((b, i) => {
+      const x = freqToX(b.freq, w);
+      const y = gainToY(b.gain, h);
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = b.color;
+      ctx.fill();
+      ctx.strokeStyle = "#1a0a00";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    // Scan lines on top of display
+    ctx.fillStyle = "rgba(0,0,0,0.04)";
+    for (let y = 0; y < h; y += 4) {
+      ctx.fillRect(0, y + 3, w, 1);
+    }
+  }
+
+  // ================================================================
+  //  LEVEL METER ANIMATION
+  // ================================================================
+  const meterIds = [
+    { id: "headerInputMeter",  base: 60, variance: 20 },
+    { id: "headerOutputMeter", base: 52, variance: 18 },
+    { id: "globalInputMeter",  base: 60, variance: 20 },
+    { id: "globalOutputMeter", base: 52, variance: 18 },
+  ];
+
+  const grMeterState = [
+    { id: "gr-fill-1", base: 6,  variance: 5  },
+    { id: "gr-fill-2", base: 5,  variance: 4  },
+    { id: "gr-fill-3", base: 4,  variance: 3  },
+    { id: "gr-fill-4", base: 3,  variance: 2  },
+  ];
+
+  // Smooth meter simulation with ballistic behavior
+  const meterSmooth = {};
+  meterIds.forEach(m => { meterSmooth[m.id] = m.base; });
+
+  function animateMeters() {
+    meterIds.forEach(m => {
+      const target = m.base + (Math.random() - 0.5) * m.variance * 2;
+      meterSmooth[m.id] = meterSmooth[m.id] * 0.75 + target * 0.25;
+      const el = document.getElementById(m.id);
+      if (el) el.style.width = `${Math.max(0, Math.min(100, meterSmooth[m.id]))}%`;
+    });
+
+    // Animate GR meters (only on bands with dynamics mode active)
+    grMeterState.forEach((g, i) => {
+      const band = i + 1;
+      const mode = paramState[`band${band}_mode`];
+      const fill = document.getElementById(g.id);
+      if (!fill) return;
+
+      if (mode === 0) {
+        // Static: no GR
+        fill.style.width = "0%";
+        fill.style.left = "50%";
+      } else {
+        // Dynamic mode: show animated GR
+        const grAmt = g.base + Math.random() * g.variance;
+        const halfW = grAmt / 2;
+        fill.style.left = `${50 - halfW}%`;
+        fill.style.width = `${grAmt}%`;
+        fill.className = `gr-meter-fill ${mode === 1 ? "positive" : "negative"}`;
+      }
+    });
+
+    requestAnimationFrame(animateMeters);
+  }
+
+  // ================================================================
+  //  INITIALIZE
+  // ================================================================
+  document.addEventListener("DOMContentLoaded", () => {
+    // Draw initial EQ display
+    drawEQCurve();
+
+    // Apply initial knob angles from default values
+    const allWrappers = document.querySelectorAll(".knob-wrapper[data-param]");
+    allWrappers.forEach(wrapper => {
+      const paramId = wrapper.dataset.param;
+      const defaultVal = parseFloat(wrapper.dataset.default);
+      updateKnobAngle(paramId, defaultVal);
+      updateValueDisplay(paramId, defaultVal);
+    });
+
+    // All bands start in Static mode — dim dynamics initially
+    for (let b = 1; b <= 4; b++) {
+      const strip = document.getElementById(`band${b}-strip`);
+      if (strip) {
+        const dynRows = strip.querySelectorAll("[id$='-dynamics'], [id$='-dynamics2']");
+        dynRows.forEach(row => row.classList.add("dynamics-dimmed"));
+      }
+    }
+
+    // Start meter animation
+    animateMeters();
+
+    // Initialize mock Juce bindings
+    const allParams = Object.keys(paramState);
+    allParams.forEach(paramId => {
+      if (paramId.includes("mode")) {
+        const state = window.Juce.getComboBoxState(paramId);
+        state.valueChangedEvent.addListener((v) => {
+          console.log(`[Juce] ${paramId} changed to`, v);
+        });
+      } else {
+        const state = window.Juce.getSliderState(paramId);
+        state.valueChangedEvent.addListener((v) => {
+          console.log(`[Juce] ${paramId} changed to`, v);
+        });
+      }
+    });
+
+    console.log("[BugosEQ] Mockup initialized — all 35 parameters bound");
+    console.log("[BugosEQ] Drag knobs up/down to adjust. Shift+drag for fine control.");
+    console.log("[BugosEQ] Click band mode buttons to switch dynamics modes.");
+  });
+</script>
+</body>
+</html>

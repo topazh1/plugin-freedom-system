@@ -1,0 +1,689 @@
+# NBS DynaDrive — UI Design Specification v6
+# Generated: 2026-02-27
+# Agent: ui-design-agent
+# Changes from v5:
+#   1. Main panel height reduced from 420px to 340px (dense layout, minimal spacing)
+#   2. Advanced panel height reduced from 260px to 195px (packed rows, tight gaps)
+#   3. Toggle bar reduced from 30px to 18px (minimal divider)
+#   4. Total expanded height: 553px (vs 680px in v5) — 19% reduction
+#   5. All inter-knob gaps reduced to 8-12px; section padding to 10-12px
+#   6. Knob rows use tighter horizontal spacing throughout
+#   7. Advanced panel: all controls packed into 3 horizontal rows, no dead zones
+
+plugin:
+  name: NBS_DynaDrive
+  display_name: "NBS DynaDrive"
+  type: "saturation + dynamics processor"
+  version: "1.0.0"
+  tagline: "Clean saturation without aliasing — Neve warmth, API dynamics"
+
+window:
+  main_width: 740
+  main_height: 340
+  expanded_width: 740
+  expanded_height: 553
+  resizable: false
+  default_state: collapsed
+
+finalization_marker: false
+
+# ─────────────────────────────────────────────
+# COLOR SYSTEM
+# ─────────────────────────────────────────────
+color_system:
+  background: "#141414"
+  panel_surface: "#1e1e1e"
+  section_divider: "#2a2a2a"
+  accent_saturation: "#c0392b"
+  accent_dynamics: "#4a90d9"
+  accent_neutral: "#888888"
+  text_primary: "#e8e8e8"
+  text_secondary: "#888888"
+  knob_body: "#1a1a1a"
+  meter_green_low: "#22c55e"
+  meter_green_high: "#16a34a"
+  meter_amber: "#f59e0b"
+  meter_red: "#ef4444"
+  meter_orange: "#f97316"
+  meter_inactive: "#2a2a2a"
+  display_bg: "#0e0e0e"
+
+# ─────────────────────────────────────────────
+# CONTROL STYLE
+# ─────────────────────────────────────────────
+control_style:
+  knob_type: "backlit_arc"
+  description: >
+    Dark circular body (#1a1a1a) with subtle drop shadow. A glowing SVG arc
+    indicator ring sweeps 270 degrees around the knob showing current value.
+    Arc color corresponds to section: red for saturation, blue for dynamics,
+    gray for utility. Small dot indicator on knob face. Label below in #888
+    at 10px. Value readout below label in 9px dimmer text.
+  arc_sweep_degrees: 270
+  arc_start_angle: 135
+  arc_end_angle: 45
+  circle_fill_knobs:
+    type: "full_circle_fill"
+    applies_to: ["input", "mix", "output"]
+    description: >
+      Input, Mix, and Output knobs use a 360-degree fill indicator instead of
+      standard 270-degree arc. At 0% the ring is empty/dim; at 100% the full
+      circle is lit. Arc fills clockwise from 12 o'clock.
+    arc_sweep_degrees: 360
+    fill_direction: "clockwise_from_top"
+
+# ─────────────────────────────────────────────
+# LAYOUT SECTIONS (v6 — dense / compacted)
+# ─────────────────────────────────────────────
+layout_sections:
+  saturation:
+    label: "SATURATION"
+    label_color: "#c0392b"
+    x: 15
+    y: 0
+    width: 218
+    height: 325
+    accent: "#c0392b"
+    note: "v6: tighter padding, DRIVE + EVEN/ODD row + curve display in 325px"
+
+  center:
+    label: "NBS DynaDrive"
+    x: 248
+    y: 0
+    width: 244
+    height: 325
+    accent: "#888888"
+    note: "v6: title + pill + INPUT/MIX/OUTPUT compressed to 325px"
+
+  dynamics:
+    label: "DYNAMICS"
+    label_color: "#4a90d9"
+    x: 510
+    y: 0
+    width: 148
+    height: 325
+    accent: "#4a90d9"
+    note: "v6: DYNAMICS + UP/DOWN + curve display compressed to 325px"
+
+  metering:
+    x: 672
+    y: 8
+    width: 58
+    height: 310
+    note: "v6: slimmer meter section, tighter"
+
+  advanced_toggle_bar:
+    x: 0
+    y: 340
+    width: 740
+    height: 18
+    note: "v6: minimal 18px toggle bar"
+
+  advanced_panel:
+    x: 0
+    y: 358
+    width: 740
+    height: 195
+    collapsible: true
+    default: collapsed
+    note: >
+      v6: all advanced controls packed into 3 tight rows.
+      Row A (y+15): Dyn Detail knobs (THRESHOLD, RATIO, ATTACK, RELEASE) + SHAPE.
+      Row B (y+80): Sat Tilt (FREQ, SLOPE) + Dyn Tilt (FREQ, SLOPE) + M/S TOGGLE.
+      Row C (y+140): MID + SIDE (conditional).
+      Total: 195px vs 260px in v5.
+
+# ─────────────────────────────────────────────
+# PARAMETERS / CONTROLS
+# ─────────────────────────────────────────────
+controls:
+
+  # ── SATURATION SECTION ──────────────────────
+
+  - id: drive
+    label: "DRIVE"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 20.0
+    unit: "%"
+    size:
+      diameter: 52
+    position:
+      x: 83
+      y: 30
+    knob_size: large
+    description: "Primary saturation input drive"
+
+  - id: even
+    label: "EVEN"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 36
+    position:
+      x: 34
+      y: 120
+    knob_size: medium
+    description: "Even harmonic content (2nd/4th order)"
+
+  - id: odd
+    label: "ODD"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 36
+    position:
+      x: 140
+      y: 120
+    knob_size: medium
+    description: "Odd harmonic content (3rd/5th order)"
+
+  # Drive curve display positioned below EVEN/ODD row
+  # visual_display: drive_curve — see visual_displays section
+  # position: x=18, y=210, width=182, height=76
+
+  # ── CENTER SECTION ──────────────────────────
+
+  - id: pre_post
+    label: "SIGNAL FLOW"
+    type: toggle
+    section: center
+    accent: "#4a90d9"
+    range: [0, 1]
+    default: 0
+    values: ["DYN→SAT", "SAT→DYN"]
+    size:
+      width: 120
+      height: 30
+    position:
+      x: 309
+      y: 118
+    style:
+      border_radius: "50px"
+      dyn_sat_bg: "#4a90d9"
+      dyn_sat_text: "#ffffff"
+      dyn_sat_glow: "0 0 14px rgba(74, 144, 217, 0.45)"
+      sat_dyn_bg: "#8b1a1a"
+      sat_dyn_text: "#ffffff"
+      sat_dyn_glow: "0 0 14px rgba(192, 57, 43, 0.40)"
+      idle_bg: "#2a2a2a"
+      idle_text: "#888888"
+      transition: "all 150ms ease"
+    description: "Pre/post routing — blue (DYN->SAT) / dark red (SAT->DYN)"
+
+  - id: input
+    label: "INPUT"
+    type: slider
+    section: center
+    accent: "#888888"
+    range: [-48.0, 10.0]
+    default: 0.0
+    unit: "dB"
+    size:
+      diameter: 33
+    position:
+      x: 265
+      y: 205
+    knob_size: small
+    indicator_style: "full_circle_fill"
+    description: "Input gain before all processing — 360-degree circle indicator"
+
+  - id: mix
+    label: "MIX"
+    type: slider
+    section: center
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 100.0
+    unit: "%"
+    size:
+      diameter: 33
+    position:
+      x: 352
+      y: 205
+    knob_size: small
+    indicator_style: "full_circle_fill"
+    description: "Dry/wet parallel blend — full 360-degree circle indicator"
+
+  - id: output
+    label: "OUTPUT"
+    type: slider
+    section: center
+    accent: "#888888"
+    range: [-48.0, 10.0]
+    default: 0.0
+    unit: "dB"
+    size:
+      diameter: 33
+    position:
+      x: 440
+      y: 205
+    knob_size: small
+    indicator_style: "full_circle_fill"
+    description: "Output gain / makeup gain — 360-degree circle indicator"
+
+  # ── DYNAMICS SECTION ─────────────────────────
+
+  - id: dynamics
+    label: "DYNAMICS"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 30.0
+    unit: "%"
+    size:
+      diameter: 52
+    position:
+      x: 557
+      y: 30
+    knob_size: large
+    description: "Macro dynamics control (upward + downward compression)"
+
+  - id: up
+    label: "UP"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 33
+    position:
+      x: 519
+      y: 120
+    knob_size: small
+    description: "Upward compression amount"
+
+  - id: down
+    label: "DOWN"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 33
+    position:
+      x: 605
+      y: 120
+    knob_size: small
+    description: "Downward compression amount"
+
+  # Dyn curve display: x=512, y=210, width=142, height=76
+
+  # ── ADVANCED PANEL — DYNAMICS DETAIL ─────────
+  # Row A: y_adv + 15 (absolute y = 358+15 = 373)
+
+  - id: threshold
+    label: "THRESHOLD"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [-40.0, 0.0]
+    default: -18.0
+    unit: "dB"
+    size:
+      diameter: 38
+    position:
+      x: 28
+      y: 380
+    knob_size: medium
+    description: "Compressor threshold"
+
+  - id: ratio
+    label: "RATIO"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [1.0, 10.0]
+    default: 4.0
+    unit: ":1"
+    size:
+      diameter: 38
+    position:
+      x: 95
+      y: 380
+    knob_size: medium
+    description: "Compression ratio"
+
+  - id: attack_time
+    label: "ATTACK"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [0.1, 100.0]
+    default: 10.0
+    unit: "ms"
+    size:
+      diameter: 38
+    position:
+      x: 162
+      y: 380
+    knob_size: medium
+    description: "Attack time"
+
+  - id: release_time
+    label: "RELEASE"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [10.0, 1000.0]
+    default: 100.0
+    unit: "ms"
+    size:
+      diameter: 38
+    position:
+      x: 229
+      y: 380
+    knob_size: medium
+    description: "Release time"
+
+  # ── ADVANCED PANEL — SATURATION DETAIL ───────
+  # SHAPE knob, same row A as dynamics knobs
+
+  - id: h_curve
+    label: "SHAPE"
+    type: slider
+    section: advanced_saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 38
+    position:
+      x: 310
+      y: 380
+    knob_size: medium
+    display_labels: ["Soft", "Medium", "Hard"]
+    display_thresholds: [25, 75]
+    description: "Saturation curve shape — continuous variable (Soft to Medium to Hard)"
+
+  # ── ADVANCED PANEL — POST-SAT TILT ───────────
+  # Row B: y = 358 + 100 = 458
+
+  - id: sat_tilt_freq
+    label: "SAT FREQ"
+    type: slider
+    section: advanced_tilt_sat
+    accent: "#c0392b"
+    range: [100.0, 10000.0]
+    default: 1000.0
+    unit: "Hz"
+    size:
+      diameter: 32
+    position:
+      x: 28
+      y: 455
+    knob_size: small
+    display_format: "frequency"
+    description: "Post-saturation tilt filter center frequency (100 Hz to 10 kHz)"
+
+  - id: sat_tilt_slope
+    label: "SAT SLOPE"
+    type: slider
+    section: advanced_tilt_sat
+    accent: "#c0392b"
+    range: [-6.0, 6.0]
+    default: 0.0
+    unit: "dB/oct"
+    size:
+      diameter: 32
+    position:
+      x: 92
+      y: 455
+    knob_size: small
+    description: "Post-saturation tilt slope (-6 dark / 0 flat / +6 bright)"
+
+  # ── ADVANCED PANEL — POST-DYN TILT ───────────
+  # Row B continued
+
+  - id: dyn_tilt_freq
+    label: "DYN FREQ"
+    type: slider
+    section: advanced_tilt_dyn
+    accent: "#4a90d9"
+    range: [100.0, 10000.0]
+    default: 1000.0
+    unit: "Hz"
+    size:
+      diameter: 32
+    position:
+      x: 170
+      y: 455
+    knob_size: small
+    display_format: "frequency"
+    description: "Post-dynamics tilt filter center frequency (100 Hz to 10 kHz)"
+
+  - id: dyn_tilt_slope
+    label: "DYN SLOPE"
+    type: slider
+    section: advanced_tilt_dyn
+    accent: "#4a90d9"
+    range: [-6.0, 6.0]
+    default: 0.0
+    unit: "dB/oct"
+    size:
+      diameter: 32
+    position:
+      x: 234
+      y: 455
+    knob_size: small
+    description: "Post-dynamics tilt slope (-6 dark / 0 flat / +6 bright)"
+
+  # ── ADVANCED PANEL — M/S ────────────────────
+  # M/S toggle on Row B, far right
+
+  - id: ms_enable
+    label: "M/S MODE"
+    type: toggle
+    section: advanced_ms
+    accent: "#888888"
+    range: [0, 1]
+    default: 0
+    values: ["STEREO", "M/S"]
+    size:
+      width: 90
+      height: 26
+    position:
+      x: 580
+      y: 460
+    description: "Enable mid/side processing mode"
+
+  # MID + SIDE: Row C — y = 358 + 155 = 513
+
+  - id: mid_drive
+    label: "MID"
+    type: slider
+    section: advanced_ms
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 32
+    position:
+      x: 576
+      y: 510
+    knob_size: small
+    description: "Mid channel saturation (visible when M/S enabled)"
+    visible_when: "ms_enable == 1"
+
+  - id: side_drive
+    label: "SIDE"
+    type: slider
+    section: advanced_ms
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 32
+    position:
+      x: 636
+      y: 510
+    knob_size: small
+    description: "Side channel saturation (visible when M/S enabled)"
+    visible_when: "ms_enable == 1"
+
+# ─────────────────────────────────────────────
+# VISUAL DISPLAYS
+# ─────────────────────────────────────────────
+visual_displays:
+
+  - id: drive_curve
+    label: "DRIVE CURVE"
+    type: svg_transfer_curve
+    section: saturation
+    position:
+      x: 18
+      y: 210
+    size:
+      width: 182
+      height: 76
+    style:
+      background: "#0e0e0e"
+      border: "1px solid rgba(192, 57, 43, 0.30)"
+      box_shadow: "inset 0 0 8px rgba(192, 57, 43, 0.08)"
+      grid_color: "#2a2a2a"
+      curve_color: "#c0392b"
+      curve_glow: "0 0 6px rgba(192, 57, 43, 0.6)"
+      label_color: "#c0392b"
+      label_size: "9px"
+    reactive_to: ["drive", "even", "odd"]
+    description: >
+      SVG transfer function display. X = input level (-1 to +1), Y = output level.
+      Curve updates in real-time as DRIVE, EVEN, ODD knobs change.
+
+  - id: dyn_curve
+    label: "DYN CURVE"
+    type: svg_compressor_curve
+    section: dynamics
+    position:
+      x: 512
+      y: 210
+    size:
+      width: 142
+      height: 76
+    style:
+      background: "#0e0e0e"
+      border: "1px solid rgba(74, 144, 217, 0.30)"
+      box_shadow: "inset 0 0 8px rgba(74, 144, 217, 0.08)"
+      grid_color: "#2a2a2a"
+      curve_color: "#4a90d9"
+      curve_glow: "0 0 6px rgba(74, 144, 217, 0.6)"
+      label_color: "#4a90d9"
+      label_size: "9px"
+    reactive_to: ["threshold", "ratio", "dynamics", "up", "down"]
+    description: >
+      SVG compressor transfer function display. X = input dB (-60 to 0), Y = output dB.
+      Shows both upward and downward compression.
+
+# ─────────────────────────────────────────────
+# METERING
+# ─────────────────────────────────────────────
+meters:
+  layout: horizontal
+  note: "v6: IN (L/R) and OUT (L/R) side by side, slimmer bar width"
+
+  - id: input_meter_stereo
+    label: "IN"
+    type: stereo_pair
+    channels: ["L", "R"]
+    size:
+      bar_width: 7
+      bar_height: 280
+      gap: 2
+    direction: "bottom_to_top"
+    color_zones:
+      - range: [0, 70]
+        color: "#22c55e"
+      - range: [70, 85]
+        color: "#f59e0b"
+      - range: [85, 100]
+        color: "#ef4444"
+
+  - id: output_meter_stereo
+    label: "OUT"
+    type: stereo_pair
+    channels: ["L", "R"]
+    size:
+      bar_width: 7
+      bar_height: 280
+      gap: 2
+    direction: "bottom_to_top"
+    color_zones:
+      - range: [0, 70]
+        color: "#22c55e"
+      - range: [70, 85]
+        color: "#f59e0b"
+      - range: [85, 100]
+        color: "#ef4444"
+
+# ─────────────────────────────────────────────
+# TYPOGRAPHY
+# ─────────────────────────────────────────────
+typography:
+  font_stack: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  plugin_name:
+    size: 16px
+    weight: 600
+    color: "#e8e8e8"
+    letter_spacing: "0.08em"
+  section_label:
+    size: 9px
+    weight: 700
+    color: "section accent"
+    letter_spacing: "0.15em"
+    text_transform: uppercase
+  knob_label:
+    size: 10px
+    weight: 500
+    color: "#777777"
+    letter_spacing: "0.08em"
+  knob_value:
+    size: 9px
+    weight: 400
+    color: "#484848"
+  display_label:
+    size: 8px
+    weight: 600
+    letter_spacing: "0.12em"
+    text_transform: uppercase
+
+# ─────────────────────────────────────────────
+# V6 CHANGE LOG
+# ─────────────────────────────────────────────
+v6_changes:
+  - change: 1
+    description: "Main panel height: 420px → 340px. Tighter vertical spacing throughout."
+  - change: 2
+    description: "Advanced panel height: 260px → 195px. Three rows, packed tightly."
+  - change: 3
+    description: "Toggle bar: 30px → 18px. Minimal divider height."
+  - change: 4
+    description: "Total expanded height: 680px → 553px (19% reduction)."
+  - change: 5
+    description: "Knob diameters reduced by 3px across medium/small categories to aid packing."
+  - change: 6
+    description: "Curve displays compressed to 76px height (was 92px) to reclaim vertical space."
+  - change: 7
+    description: "Inter-knob gap in advanced section: 12px (was 20-25px)."
+  - change: 8
+    description: "SHAPE knob moved to Row A alongside dynamics knobs — same horizontal band."
+  - change: 9
+    description: "Tilt + M/S toggle consolidated on Row B; MID/SIDE on Row C."
+  - note: "Total parameter count unchanged: 19 interactive + 2 visual displays + 2 toggles"

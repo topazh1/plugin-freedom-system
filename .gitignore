@@ -1,0 +1,36 @@
+# Build artifacts
+build/
+Builds/
+logs/
+backups/
+
+# Cache
+.claude/cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# OS files
+.DS_Store
+
+# Prompts
+prompts/
+
+# Personal todos
+TO-DOS.md
+build/
+cmake-build-*/
+build-*/
+.vs/
+*.a
+*.o
+*.obj
+*.dylib
+*.so
+*.dll
+*.vst3
+*.component
+*.app

@@ -1,0 +1,696 @@
+# NBS DynaDrive — UI Design Specification v8
+# Generated: 2026-02-27
+# Agent: ui-design-agent
+# Changes from v7:
+#   1. Advanced panel: ALL section titles centered horizontally within their column
+#   2. Advanced panel: ALL knob rows centered horizontally beneath their centered title
+#   3. Advanced panel: Top padding reduced (10px → 8px), bottom padding tightened
+#   4. Advanced panel: Title-to-knobs gap tightened (8px → 5px)
+#   5. Advanced panel: Total height reduced: 155px → 130px
+#   6. Plugin expanded height updated: 573px → 548px
+
+plugin:
+  name: NBS_DynaDrive
+  display_name: "NBS DynaDrive"
+  type: "saturation + dynamics processor"
+  version: "1.0.0"
+  tagline: "Clean saturation without aliasing — Neve warmth, API dynamics"
+
+window:
+  main_width: 740
+  main_height: 400
+  expanded_width: 740
+  expanded_height: 548
+  resizable: false
+  default_state: collapsed
+
+finalization_marker: true
+
+# ─────────────────────────────────────────────
+# COLOR SYSTEM
+# ─────────────────────────────────────────────
+color_system:
+  background: "#141414"
+  panel_surface: "#1e1e1e"
+  section_divider: "#2a2a2a"
+  accent_saturation: "#c0392b"
+  accent_dynamics: "#4a90d9"
+  accent_neutral: "#888888"
+  text_primary: "#e8e8e8"
+  text_secondary: "#888888"
+  knob_body: "#1a1a1a"
+  meter_green_low: "#22c55e"
+  meter_green_high: "#16a34a"
+  meter_amber: "#f59e0b"
+  meter_red: "#ef4444"
+  meter_orange: "#f97316"
+  meter_inactive: "#2a2a2a"
+  display_bg: "#0e0e0e"
+
+# ─────────────────────────────────────────────
+# CONTROL STYLE
+# ─────────────────────────────────────────────
+control_style:
+  knob_type: "backlit_arc"
+  description: >
+    Dark circular body (#1a1a1a) with subtle drop shadow. A glowing SVG arc
+    indicator ring sweeps 270 degrees around the knob showing current value.
+    Arc color corresponds to section: red for saturation, blue for dynamics,
+    gray for utility. Small dot indicator on knob face. Label below in #888
+    at 10px. Value readout below label in 9px dimmer text.
+  arc_sweep_degrees: 270
+  arc_start_angle: 135
+  arc_end_angle: 45
+  circle_fill_knobs:
+    type: "full_circle_fill"
+    applies_to: ["input", "mix", "output"]
+    description: >
+      Input, Mix, and Output knobs use a 360-degree fill indicator instead of
+      standard 270-degree arc. Arc fills CLOCKWISE from 12 o'clock (top).
+      At 0% (normalized 0.0) the ring is completely empty — only the dim #252525
+      background ring is visible. At 100% (normalized 1.0) the ring is fully
+      lit with accent color. MIX defaults to 100% so it shows a fully lit ring
+      at startup. INPUT and OUTPUT default to 0 dB which maps to mid-range fill.
+    arc_sweep_degrees: 360
+    fill_direction: "clockwise_from_top"
+    mix_default_note: "MIX = 100% → normVal = 1.0 → full circle lit at startup"
+
+# ─────────────────────────────────────────────
+# LAYOUT SECTIONS (v8 — advanced panel tightened)
+# ─────────────────────────────────────────────
+layout_sections:
+  saturation:
+    label: "SATURATION"
+    label_color: "#c0392b"
+    x: 15
+    y: 0
+    width: 218
+    height: 385
+    accent: "#c0392b"
+    note: >
+      v7/v8: DRIVE + EVEN/ODD + curve (76px) + SHAPE knob below curve.
+      Total height ~385px: header(20) + drive(77) + even/odd(61) + gap(8)
+      + curve(76) + gap(8) + shape(63) + bottom(10) = 323px of content in 385px space.
+
+  center:
+    label: "NBS DynaDrive"
+    x: 248
+    y: 0
+    width: 244
+    height: 385
+    accent: "#888888"
+    note: >
+      v7/v8: title + pill + INPUT/MIX/OUTPUT + POST-SAT TILT below MIX row.
+      Tilt group label "POST-SAT TILT" with FREQ + SLOPE knobs (red accent).
+
+  dynamics:
+    label: "DYNAMICS"
+    label_color: "#4a90d9"
+    x: 510
+    y: 0
+    width: 148
+    height: 385
+    accent: "#4a90d9"
+    note: "v7/v8: DYNAMICS + UP/DOWN + curve display."
+
+  metering:
+    x: 672
+    y: 8
+    width: 58
+    height: 365
+    note: "v7/v8: meter bars taller to fill 400px main panel"
+
+  advanced_toggle_bar:
+    x: 0
+    y: 400
+    width: 740
+    height: 18
+    note: "v7/v8: 18px toggle bar, positioned at y=400"
+
+  advanced_panel:
+    x: 0
+    y: 418
+    width: 740
+    height: 130
+    collapsible: true
+    default: collapsed
+    note: >
+      v8: Reduced from 155px to 130px.
+      ALL section titles centered horizontally within their column.
+      ALL knob rows centered as a group beneath their centered title.
+      Top padding: 8px. Bottom padding: 8px. Title-to-knobs gap: 5px.
+      Remaining: Dynamics detail (threshold/ratio/attack/release) centered in left column.
+      Post-Dyn Tilt (FREQ/SLOPE) centered in center column.
+      M/S section centered in right column (toggle inline with label, knobs below when active).
+
+# ─────────────────────────────────────────────
+# PARAMETERS / CONTROLS
+# ─────────────────────────────────────────────
+controls:
+
+  # ── SATURATION SECTION ──────────────────────
+
+  - id: drive
+    label: "DRIVE"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 20.0
+    unit: "%"
+    size:
+      diameter: 52
+    position:
+      x: 83
+      y: 30
+    knob_size: large
+    description: "Primary saturation input drive"
+
+  - id: even
+    label: "EVEN"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 36
+    position:
+      x: 34
+      y: 120
+    knob_size: medium
+    description: "Even harmonic content (2nd/4th order)"
+
+  - id: odd
+    label: "ODD"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 36
+    position:
+      x: 140
+      y: 120
+    knob_size: medium
+    description: "Odd harmonic content (3rd/5th order)"
+
+  # Drive curve display: x=18, y=195, width=188, height=76
+  # SHAPE knob positioned below drive curve in main panel
+
+  - id: h_curve
+    label: "SHAPE"
+    type: slider
+    section: saturation
+    accent: "#c0392b"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 38
+    position:
+      x: 90
+      y: 300
+    knob_size: medium
+    display_labels: ["Soft", "Medium", "Hard"]
+    display_thresholds: [25, 75]
+    description: >
+      Saturation curve shape — in main panel, below drive curve display.
+      Always visible. Red accent. Continuous variable (Soft/Medium/Hard).
+
+  # ── CENTER SECTION ──────────────────────────
+
+  - id: pre_post
+    label: "SIGNAL FLOW"
+    type: toggle
+    section: center
+    accent: "#4a90d9"
+    range: [0, 1]
+    default: 0
+    values: ["DYN→SAT", "SAT→DYN"]
+    size:
+      width: 120
+      height: 30
+    position:
+      x: 309
+      y: 100
+    style:
+      border_radius: "50px"
+      dyn_sat_bg: "rgba(74, 144, 217, 0.18)"
+      dyn_sat_border: "rgba(74, 144, 217, 0.55)"
+      dyn_sat_color: "#4a90d9"
+      sat_dyn_bg: "rgba(192, 57, 43, 0.18)"
+      sat_dyn_border: "rgba(192, 57, 43, 0.50)"
+      sat_dyn_color: "#e05a4b"
+      transition: "all 150ms ease"
+    description: "Pre/post routing — blue (DYN->SAT) / red (SAT->DYN)"
+
+  - id: input
+    label: "INPUT"
+    type: slider
+    section: center
+    accent: "#888888"
+    range: [-48.0, 10.0]
+    default: 0.0
+    unit: "dB"
+    size:
+      diameter: 33
+    position:
+      x: 265
+      y: 180
+    knob_size: small
+    indicator_style: "full_circle_fill"
+    description: "Input gain — 360-degree circle indicator. 0dB = mid-range fill."
+
+  - id: mix
+    label: "MIX"
+    type: slider
+    section: center
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 100.0
+    unit: "%"
+    size:
+      diameter: 33
+    position:
+      x: 352
+      y: 180
+    knob_size: small
+    indicator_style: "full_circle_fill"
+    description: >
+      Dry/wet parallel blend — 360-degree circle indicator.
+      DEFAULT IS 100% → normVal = 1.0 → full circle completely lit at startup.
+      At 0% → ring is completely empty (just dim background ring, no color fill).
+
+  - id: output
+    label: "OUTPUT"
+    type: slider
+    section: center
+    accent: "#888888"
+    range: [-48.0, 10.0]
+    default: 0.0
+    unit: "dB"
+    size:
+      diameter: 33
+    position:
+      x: 440
+      y: 180
+    knob_size: small
+    indicator_style: "full_circle_fill"
+    description: "Output / makeup gain — 360-degree circle indicator. 0dB = mid-range fill."
+
+  # POST-SAT TILT — in main center section, below MIX row
+
+  - id: sat_tilt_freq
+    label: "FREQ"
+    type: slider
+    section: center
+    accent: "#c0392b"
+    range: [100.0, 10000.0]
+    default: 1000.0
+    unit: "Hz"
+    size:
+      diameter: 30
+    position:
+      x: 330
+      y: 270
+    knob_size: small
+    display_format: "frequency"
+    description: >
+      Post-saturation tilt filter center frequency — in main panel.
+      Grouped under "POST-SAT TILT" label. Red accent. Below INPUT/MIX/OUTPUT row.
+
+  - id: sat_tilt_slope
+    label: "SLOPE"
+    type: slider
+    section: center
+    accent: "#c0392b"
+    range: [-6.0, 6.0]
+    default: 0.0
+    unit: "dB/oct"
+    size:
+      diameter: 30
+    position:
+      x: 390
+      y: 270
+    knob_size: small
+    description: >
+      Post-saturation tilt slope — in main panel.
+      Red accent. Grouped with sat_tilt_freq under "POST-SAT TILT" label.
+
+  # ── DYNAMICS SECTION ─────────────────────────
+
+  - id: dynamics
+    label: "DYNAMICS"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 30.0
+    unit: "%"
+    size:
+      diameter: 52
+    position:
+      x: 557
+      y: 30
+    knob_size: large
+    description: "Macro dynamics control (upward + downward compression)"
+
+  - id: up
+    label: "UP"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 0.0
+    unit: "%"
+    size:
+      diameter: 33
+    position:
+      x: 519
+      y: 120
+    knob_size: small
+    description: "Upward compression amount"
+
+  - id: down
+    label: "DOWN"
+    type: slider
+    section: dynamics
+    accent: "#4a90d9"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 33
+    position:
+      x: 605
+      y: 120
+    knob_size: small
+    description: "Downward compression amount"
+
+  # Dyn curve display: x=512, y=210, width=142, height=76
+
+  # ── ADVANCED PANEL — DYNAMICS DETAIL (CENTERED) ──
+  # v8: title centered, knobs row centered beneath
+
+  - id: threshold
+    label: "THR"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [-40.0, 0.0]
+    default: -18.0
+    unit: "dB"
+    size:
+      diameter: 38
+    position:
+      x: 28
+      y: 433
+    knob_size: medium
+    description: "Compressor threshold — centered in Dynamics Detail column"
+
+  - id: ratio
+    label: "RATIO"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [1.0, 10.0]
+    default: 4.0
+    unit: ":1"
+    size:
+      diameter: 38
+    position:
+      x: 95
+      y: 433
+    knob_size: medium
+    description: "Compression ratio — centered in Dynamics Detail column"
+
+  - id: attack_time
+    label: "ATK"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [0.1, 100.0]
+    default: 10.0
+    unit: "ms"
+    size:
+      diameter: 38
+    position:
+      x: 162
+      y: 433
+    knob_size: medium
+    description: "Attack time — centered in Dynamics Detail column"
+
+  - id: release_time
+    label: "REL"
+    type: slider
+    section: advanced_dynamics
+    accent: "#4a90d9"
+    range: [10.0, 1000.0]
+    default: 100.0
+    unit: "ms"
+    size:
+      diameter: 38
+    position:
+      x: 229
+      y: 433
+    knob_size: medium
+    description: "Release time — centered in Dynamics Detail column"
+
+  # ── ADVANCED PANEL — POST-DYN TILT (CENTERED) ──
+  # v8: title centered, knobs row centered beneath
+
+  - id: dyn_tilt_freq
+    label: "FREQ"
+    type: slider
+    section: advanced_tilt_dyn
+    accent: "#4a90d9"
+    range: [100.0, 10000.0]
+    default: 1000.0
+    unit: "Hz"
+    size:
+      diameter: 32
+    position:
+      x: 320
+      y: 433
+    knob_size: small
+    display_format: "frequency"
+    description: "Post-dynamics tilt filter center frequency — centered in tilt column"
+
+  - id: dyn_tilt_slope
+    label: "SLOPE"
+    type: slider
+    section: advanced_tilt_dyn
+    accent: "#4a90d9"
+    range: [-6.0, 6.0]
+    default: 0.0
+    unit: "dB/oct"
+    size:
+      diameter: 32
+    position:
+      x: 384
+      y: 433
+    knob_size: small
+    description: "Post-dynamics tilt slope — centered in tilt column"
+
+  # ── ADVANCED PANEL — M/S (CENTERED) ──────────
+  # v8: M/S section centered, title + toggle inline, MID/SIDE knobs centered below
+
+  - id: ms_enable
+    label: "M/S"
+    type: toggle
+    section: advanced_ms
+    accent: "#888888"
+    range: [0, 1]
+    default: 0
+    values: ["STEREO", "M/S"]
+    size:
+      width: 90
+      height: 26
+    position:
+      x: 558
+      y: 433
+    description: >
+      Enable mid/side processing mode. Centered in advanced panel right column.
+      Title label 'M/S' is aligned inline with the toggle button (not floating above).
+
+  - id: mid_drive
+    label: "MID"
+    type: slider
+    section: advanced_ms
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 32
+    position:
+      x: 536
+      y: 490
+    knob_size: small
+    description: "Mid channel saturation (visible when M/S enabled)"
+    visible_when: "ms_enable == 1"
+
+  - id: side_drive
+    label: "SIDE"
+    type: slider
+    section: advanced_ms
+    accent: "#888888"
+    range: [0.0, 100.0]
+    default: 50.0
+    unit: "%"
+    size:
+      diameter: 32
+    position:
+      x: 596
+      y: 490
+    knob_size: small
+    description: "Side channel saturation (visible when M/S enabled)"
+    visible_when: "ms_enable == 1"
+
+# ─────────────────────────────────────────────
+# VISUAL DISPLAYS
+# ─────────────────────────────────────────────
+visual_displays:
+
+  - id: drive_curve
+    label: "TRANSFER"
+    type: svg_transfer_curve
+    section: saturation
+    position:
+      x: 18
+      y: 195
+    size:
+      width: 188
+      height: 76
+    style:
+      background: "#0e0e0e"
+      border: "1px solid rgba(192, 57, 43, 0.30)"
+      box_shadow: "inset 0 0 8px rgba(192, 57, 43, 0.08)"
+      grid_color: "#2a2a2a"
+      curve_color: "#c0392b"
+      curve_glow: "0 0 6px rgba(192, 57, 43, 0.6)"
+    reactive_to: ["drive", "even", "odd"]
+    description: >
+      SVG transfer function display. Below EVEN/ODD row. SHAPE knob appears directly
+      below this display in the main panel.
+
+  - id: dyn_curve
+    label: "COMPRESSOR"
+    type: svg_compressor_curve
+    section: dynamics
+    position:
+      x: 512
+      y: 195
+    size:
+      width: 142
+      height: 76
+    style:
+      background: "#0e0e0e"
+      border: "1px solid rgba(74, 144, 217, 0.30)"
+      box_shadow: "inset 0 0 8px rgba(74, 144, 217, 0.08)"
+      grid_color: "#2a2a2a"
+      curve_color: "#4a90d9"
+      curve_glow: "0 0 6px rgba(74, 144, 217, 0.6)"
+    reactive_to: ["threshold", "ratio", "dynamics", "up", "down"]
+
+# ─────────────────────────────────────────────
+# METERING
+# ─────────────────────────────────────────────
+meters:
+  layout: horizontal
+  note: "v7/v8: IN (L/R) and OUT (L/R) side by side, bars taller to fill 400px main panel"
+
+  - id: input_meter_stereo
+    label: "IN"
+    type: stereo_pair
+    channels: ["L", "R"]
+    size:
+      bar_width: 7
+      bar_height: 340
+      gap: 2
+    direction: "bottom_to_top"
+    color_zones:
+      - range: [0, 70]
+        color: "#22c55e"
+      - range: [70, 85]
+        color: "#f59e0b"
+      - range: [85, 100]
+        color: "#ef4444"
+
+  - id: output_meter_stereo
+    label: "OUT"
+    type: stereo_pair
+    channels: ["L", "R"]
+    size:
+      bar_width: 7
+      bar_height: 340
+      gap: 2
+    direction: "bottom_to_top"
+    color_zones:
+      - range: [0, 70]
+        color: "#22c55e"
+      - range: [70, 85]
+        color: "#f59e0b"
+      - range: [85, 100]
+        color: "#ef4444"
+
+# ─────────────────────────────────────────────
+# TYPOGRAPHY
+# ─────────────────────────────────────────────
+typography:
+  font_stack: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+  plugin_name:
+    size: 16px
+    weight: 600
+    color: "#e8e8e8"
+    letter_spacing: "0.08em"
+  section_label:
+    size: 9px
+    weight: 700
+    color: "section accent"
+    letter_spacing: "0.15em"
+    text_transform: uppercase
+  knob_label:
+    size: 10px
+    weight: 500
+    color: "#777777"
+    letter_spacing: "0.08em"
+  knob_value:
+    size: 9px
+    weight: 400
+    color: "#484848"
+  display_label:
+    size: 8px
+    weight: 600
+    letter_spacing: "0.12em"
+    text_transform: uppercase
+
+# ─────────────────────────────────────────────
+# V8 CHANGE LOG
+# ─────────────────────────────────────────────
+v8_changes:
+  - change: 1
+    description: >
+      Advanced panel: ALL section titles (DYNAMICS DETAIL, POST-DYN TILT, M/S)
+      now horizontally centered within their respective columns using
+      text-align: center and align-items: center on their containers.
+  - change: 2
+    description: >
+      Advanced panel: ALL knob rows centered as a group beneath their centered title
+      using justify-content: center. Each section is a centered flex column:
+      title on top centered, knobs row centered below.
+  - change: 3
+    description: >
+      Advanced panel: Top padding reduced from 10px to 8px.
+      Bottom padding reduced from 8px to 8px (stays same but panel shrinks).
+      Title-to-knobs gap tightened from 8px margin-bottom to 5px.
+  - change: 4
+    description: >
+      Advanced panel: Total height reduced from 155px to 130px.
+      Achieved by centering layout (removing left-padding bias) + tighter vertical rhythm.
+      Plugin expanded height updated from 573px to 548px.
+  - note: "All other controls, colors, interactions, curves, meters unchanged from v7."

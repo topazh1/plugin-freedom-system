@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NBS DynaDrive — UI Mockup v6</title>
+
+  <style>
+    /* ══════════════════════════════════════════════
+       WEBVIEW CRITICAL CONSTRAINTS
+       ══════════════════════════════════════════════ */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+      overflow: hidden;
+      background: #0a0a0a;
+      color: #e8e8e8;
+      font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ══════════════════════════════════════════════
+       PLUGIN SHELL
+       ══════════════════════════════════════════════ */
+    #plugin-shell {
+      width: 740px;
+      background: #141414;
+      position: relative;
+      border: 1px solid #2a2a2a;
+      box-shadow:
+        0 10px 48px rgba(0,0,0,0.8),
+        0 2px 8px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.03);
+      border-radius: 2px;
+    }
+
+    /* ══════════════════════════════════════════════
+       MAIN PANEL — 340px tall (v6: compressed)
+       ══════════════════════════════════════════════ */
+    #main-panel {
+      width: 740px;
+      height: 340px;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    /* ══════════════════════════════════════════════
+       SECTION LAYOUT
+       ══════════════════════════════════════════════ */
+    .section {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 12px;
+      padding-bottom: 8px;
+    }
+
+    #section-saturation {
+      width: 228px;
+      min-width: 228px;
+      border-right: 1px solid #232323;
+      background: linear-gradient(180deg, rgba(192,57,43,0.05) 0%, transparent 55%);
+    }
+
+    #section-center {
+      flex: 1;
+      border-right: 1px solid #232323;
+      background: #141414;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0;
+    }
+
+    #section-dynamics {
+      width: 186px;
+      min-width: 186px;
+      border-right: 1px solid #232323;
+      background: linear-gradient(180deg, rgba(74,144,217,0.05) 0%, transparent 55%);
+    }
+
+    #section-meters {
+      width: 68px;
+      min-width: 68px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 5px 8px;
+      gap: 0;
+    }
+
+    /* ══════════════════════════════════════════════
+       SECTION HEADERS
+       ══════════════════════════════════════════════ */
+    .section-header {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    .section-header.sat  { color: #c0392b; }
+    .section-header.dyn  { color: #4a90d9; }
+
+    /* ══════════════════════════════════════════════
+       KNOB COMPONENT
+       ══════════════════════════════════════════════ */
+    .knob-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: ns-resize;
+      flex-shrink: 0;
+    }
+
+    .knob-wrap svg {
+      display: block;
+      overflow: visible;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+    }
+
+    .knob-label {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.09em;
+      color: #666;
+      text-align: center;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .knob-value {
+      font-size: 8px;
+      font-weight: 400;
+      color: #404040;
+      text-align: center;
+      min-height: 10px;
+    }
+
+    /* ══════════════════════════════════════════════
+       KNOB ROWS
+       ══════════════════════════════════════════════ */
+    .knob-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+      padding: 0 10px;
+    }
+
+    /* ══════════════════════════════════════════════
+       SATURATION SECTION INTERNALS (v6)
+       ══════════════════════════════════════════════ */
+    #sat-main {
+      margin-top: 2px;
+      margin-bottom: 10px;
+    }
+
+    #sat-pair {
+      margin-bottom: 10px;
+    }
+
+    /* ══════════════════════════════════════════════
+       DRIVE CURVE DISPLAY
+       ══════════════════════════════════════════════ */
+    #drive-curve-wrap {
+      width: 188px;
+      height: 76px;
+      background: #0d0d0d;
+      border: 1px solid rgba(192, 57, 43, 0.28);
+      box-shadow:
+        inset 0 0 10px rgba(192, 57, 43, 0.07),
+        inset 0 1px 0 rgba(0,0,0,0.5);
+      position: relative;
+      border-radius: 3px;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    #drive-curve-label {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: rgba(192, 57, 43, 0.65);
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    #drive-curve-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ══════════════════════════════════════════════
+       DYN CURVE DISPLAY
+       ══════════════════════════════════════════════ */
+    #dyn-curve-wrap {
+      width: 158px;
+      height: 76px;
+      background: #0d0d0d;
+      border: 1px solid rgba(74, 144, 217, 0.28);
+      box-shadow:
+        inset 0 0 10px rgba(74, 144, 217, 0.07),
+        inset 0 1px 0 rgba(0,0,0,0.5);
+      position: relative;
+      border-radius: 3px;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    #dyn-curve-label {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: rgba(74, 144, 217, 0.65);
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    #dyn-curve-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ══════════════════════════════════════════════
+       CENTER SECTION INTERNALS (v6)
+       ══════════════════════════════════════════════ */
+    #center-title-block {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 0 10px;
+      border-bottom: 1px solid #1e1e1e;
+      flex-shrink: 0;
+    }
+
+    #plugin-name {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      color: #d8d8d8;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    #plugin-tagline {
+      font-size: 8px;
+      font-weight: 400;
+      color: #444;
+      letter-spacing: 0.06em;
+    }
+
+    #center-main-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      justify-content: center;
+      gap: 12px;
+      padding: 8px 0 6px;
+      width: 100%;
+    }
+
+    /* ══════════════════════════════════════════════
+       PRE/POST TOGGLE PILL
+       ══════════════════════════════════════════════ */
+    #pre-post-toggle {
+      width: 120px;
+      height: 28px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 150ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #pre-post-toggle.state-dyn-sat {
+      background: rgba(74, 144, 217, 0.18);
+      border: 1px solid rgba(74, 144, 217, 0.55);
+      color: #4a90d9;
+      box-shadow: 0 0 14px rgba(74, 144, 217, 0.25), inset 0 1px 0 rgba(74,144,217,0.12);
+    }
+
+    #pre-post-toggle.state-sat-dyn {
+      background: rgba(192, 57, 43, 0.18);
+      border: 1px solid rgba(192, 57, 43, 0.50);
+      color: #e05a4b;
+      box-shadow: 0 0 14px rgba(192, 57, 43, 0.22), inset 0 1px 0 rgba(192,57,43,0.12);
+    }
+
+    #toggle-label-left, #toggle-label-right {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    #toggle-arrow {
+      margin: 0 5px;
+      font-size: 9px;
+      opacity: 0.7;
+    }
+
+    /* INPUT/MIX/OUTPUT knob row */
+    #imo-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    /* ══════════════════════════════════════════════
+       DYNAMICS SECTION INTERNALS (v6)
+       ══════════════════════════════════════════════ */
+    #dyn-main {
+      margin-top: 2px;
+      margin-bottom: 10px;
+    }
+
+    #dyn-pair {
+      margin-bottom: 10px;
+    }
+
+    /* ══════════════════════════════════════════════
+       METERS (v6: compact)
+       ══════════════════════════════════════════════ */
+    #meter-container {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: flex-end;
+      height: 100%;
+    }
+
+    .meter-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .meter-label {
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: #444;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .stereo-bars {
+      display: flex;
+      flex-direction: row;
+      gap: 2px;
+      align-items: flex-end;
+      height: 280px;
+    }
+
+    .meter-bar-track {
+      width: 7px;
+      height: 280px;
+      background: #111;
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .meter-bar-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0%;
+      transition: height 80ms ease-out;
+      border-radius: 1px;
+    }
+
+    .ch-label {
+      font-size: 6px;
+      color: #383838;
+      letter-spacing: 0.04em;
+      text-align: center;
+    }
+
+    /* ══════════════════════════════════════════════
+       ADVANCED TOGGLE BAR — 18px
+       ══════════════════════════════════════════════ */
+    #advanced-toggle-bar {
+      width: 740px;
+      height: 18px;
+      background: #111;
+      border-top: 1px solid #232323;
+      border-bottom: 1px solid #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      gap: 8px;
+      transition: background 120ms ease;
+    }
+
+    #advanced-toggle-bar:hover {
+      background: #161616;
+    }
+
+    #adv-toggle-label {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.20em;
+      color: #3a3a3a;
+      text-transform: uppercase;
+      transition: color 120ms ease;
+    }
+
+    #advanced-toggle-bar:hover #adv-toggle-label {
+      color: #555;
+    }
+
+    #adv-toggle-arrow {
+      font-size: 7px;
+      color: #333;
+      transition: transform 200ms ease, color 120ms ease;
+    }
+
+    #advanced-toggle-bar:hover #adv-toggle-arrow {
+      color: #555;
+    }
+
+    #advanced-toggle-bar.open #adv-toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* ══════════════════════════════════════════════
+       ADVANCED PANEL — 195px expanded
+       ══════════════════════════════════════════════ */
+    #advanced-panel {
+      width: 740px;
+      height: 0;
+      overflow: hidden;
+      background: #111111;
+      border-top: 1px solid #1c1c1c;
+      transition: height 220ms cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    #advanced-panel.open {
+      height: 195px;
+    }
+
+    #advanced-inner {
+      width: 740px;
+      height: 195px;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+    }
+
+    /* ── Advanced Left Column: Dynamics + Shape ─ */
+    #adv-col-left {
+      width: 380px;
+      min-width: 380px;
+      border-right: 1px solid #1e1e1e;
+      padding: 10px 10px 8px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    #adv-col-left-header {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .adv-section-label {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .adv-section-label.dyn { color: rgba(74, 144, 217, 0.8); }
+    .adv-section-label.sat { color: rgba(192, 57, 43, 0.8); }
+    .adv-section-label.neutral { color: #444; }
+
+    #adv-row-a {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .adv-divider-v {
+      width: 1px;
+      background: #1e1e1e;
+      margin: 0 4px;
+      align-self: stretch;
+    }
+
+    /* ── Advanced Right Column: Tilt + M/S ───── */
+    #adv-col-right {
+      flex: 1;
+      padding: 10px 12px 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    #adv-col-right-header {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    #adv-row-b {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 8px;
+      flex: 1;
+    }
+
+    #adv-ms-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    /* M/S toggle */
+    #ms-toggle {
+      width: 86px;
+      height: 24px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    #ms-toggle.stereo {
+      background: #1a1a1a;
+      border: 1px solid #303030;
+      color: #444;
+    }
+
+    #ms-toggle.ms-active {
+      background: rgba(136, 136, 136, 0.15);
+      border: 1px solid rgba(136, 136, 136, 0.45);
+      color: #aaa;
+      box-shadow: 0 0 8px rgba(136, 136, 136, 0.15);
+    }
+
+    #ms-knobs {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      transition: opacity 150ms ease;
+    }
+
+    #ms-knobs.hidden {
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════════════
+       TILT SECTION GROUPS
+       ══════════════════════════════════════════════ */
+    .tilt-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tilt-group-label {
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.75;
+    }
+
+    .tilt-group-label.sat { color: #c0392b; }
+    .tilt-group-label.dyn { color: #4a90d9; }
+
+    .tilt-knob-row {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="plugin-shell">
+
+  <!-- ══════════════════════════════════════════════
+       MAIN PANEL
+       ══════════════════════════════════════════════ -->
+  <div id="main-panel">
+
+    <!-- SATURATION SECTION -->
+    <div id="section-saturation" class="section">
+      <div class="section-header sat">Saturation</div>
+
+      <!-- DRIVE (large) -->
+      <div id="sat-main">
+        <div class="knob-wrap" data-id="drive" data-min="0" data-max="100" data-default="20" data-unit="%" data-color="#c0392b">
+          <svg width="52" height="52" viewBox="0 0 52 52"></svg>
+          <div class="knob-label">DRIVE</div>
+          <div class="knob-value" id="val-drive">20%</div>
+        </div>
+      </div>
+
+      <!-- EVEN + ODD -->
+      <div class="knob-row" id="sat-pair">
+        <div class="knob-wrap" data-id="even" data-min="0" data-max="100" data-default="0" data-unit="%" data-color="#c0392b">
+          <svg width="36" height="36" viewBox="0 0 36 36"></svg>
+          <div class="knob-label">EVEN</div>
+          <div class="knob-value" id="val-even">0%</div>
+        </div>
+        <div class="knob-wrap" data-id="odd" data-min="0" data-max="100" data-default="0" data-unit="%" data-color="#c0392b">
+          <svg width="36" height="36" viewBox="0 0 36 36"></svg>
+          <div class="knob-label">ODD</div>
+          <div class="knob-value" id="val-odd">0%</div>
+        </div>
+      </div>
+
+      <!-- Drive curve display -->
+      <div id="drive-curve-wrap">
+        <div id="drive-curve-label">Transfer</div>
+        <svg id="drive-curve-svg" viewBox="0 0 188 76" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+
+    <!-- CENTER SECTION -->
+    <div id="section-center">
+      <div id="center-title-block">
+        <div id="plugin-name">NBS DynaDrive</div>
+        <div id="plugin-tagline">Saturation &amp; Dynamics Processor</div>
+      </div>
+
+      <div id="center-main-controls">
+        <!-- Pre/Post toggle -->
+        <div id="pre-post-toggle" class="state-dyn-sat">
+          <span id="toggle-label-left">DYN</span>
+          <span id="toggle-arrow">&#8594;</span>
+          <span id="toggle-label-right">SAT</span>
+        </div>
+
+        <!-- INPUT / MIX / OUTPUT -->
+        <div id="imo-row">
+          <div class="knob-wrap" data-id="input" data-min="-48" data-max="10" data-default="0" data-unit="dB" data-color="#777777" data-style="circle">
+            <svg width="33" height="33" viewBox="0 0 33 33"></svg>
+            <div class="knob-label">INPUT</div>
+            <div class="knob-value" id="val-input">0.0 dB</div>
+          </div>
+          <div class="knob-wrap" data-id="mix" data-min="0" data-max="100" data-default="100" data-unit="%" data-color="#777777" data-style="circle">
+            <svg width="33" height="33" viewBox="0 0 33 33"></svg>
+            <div class="knob-label">MIX</div>
+            <div class="knob-value" id="val-mix">100%</div>
+          </div>
+          <div class="knob-wrap" data-id="output" data-min="-48" data-max="10" data-default="0" data-unit="dB" data-color="#777777" data-style="circle">
+            <svg width="33" height="33" viewBox="0 0 33 33"></svg>
+            <div class="knob-label">OUTPUT</div>
+            <div class="knob-value" id="val-output">0.0 dB</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMICS SECTION -->
+    <div id="section-dynamics" class="section">
+      <div class="section-header dyn">Dynamics</div>
+
+      <!-- DYNAMICS (large) -->
+      <div id="dyn-main">
+        <div class="knob-wrap" data-id="dynamics" data-min="0" data-max="100" data-default="30" data-unit="%" data-color="#4a90d9">
+          <svg width="52" height="52" viewBox="0 0 52 52"></svg>
+          <div class="knob-label">DYNAMICS</div>
+          <div class="knob-value" id="val-dynamics">30%</div>
+        </div>
+      </div>
+
+      <!-- UP + DOWN -->
+      <div class="knob-row" id="dyn-pair">
+        <div class="knob-wrap" data-id="up" data-min="0" data-max="100" data-default="0" data-unit="%" data-color="#4a90d9">
+          <svg width="33" height="33" viewBox="0 0 33 33"></svg>
+          <div class="knob-label">UP</div>
+          <div class="knob-value" id="val-up">0%</div>
+        </div>
+        <div class="knob-wrap" data-id="down" data-min="0" data-max="100" data-default="50" data-unit="%" data-color="#4a90d9">
+          <svg width="33" height="33" viewBox="0 0 33 33"></svg>
+          <div class="knob-label">DOWN</div>
+          <div class="knob-value" id="val-down">50%</div>
+        </div>
+      </div>
+
+      <!-- Dyn curve display -->
+      <div id="dyn-curve-wrap">
+        <div id="dyn-curve-label">Compressor</div>
+        <svg id="dyn-curve-svg" viewBox="0 0 158 76" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+
+    <!-- METERS SECTION -->
+    <div id="section-meters">
+      <div id="meter-container">
+        <!-- IN meters -->
+        <div class="meter-group">
+          <div class="meter-label">IN</div>
+          <div class="stereo-bars">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="meter-bar-track">
+                <div class="meter-bar-fill" id="in-l-fill"></div>
+              </div>
+              <div class="ch-label">L</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="meter-bar-track">
+                <div class="meter-bar-fill" id="in-r-fill"></div>
+              </div>
+              <div class="ch-label">R</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OUT meters -->
+        <div class="meter-group">
+          <div class="meter-label">OUT</div>
+          <div class="stereo-bars">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="meter-bar-track">
+                <div class="meter-bar-fill" id="out-l-fill"></div>
+              </div>
+              <div class="ch-label">L</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="meter-bar-track">
+                <div class="meter-bar-fill" id="out-r-fill"></div>
+              </div>
+              <div class="ch-label">R</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#main-panel -->
+
+  <!-- ══════════════════════════════════════════════
+       ADVANCED TOGGLE BAR — 18px
+       ══════════════════════════════════════════════ -->
+  <div id="advanced-toggle-bar">
+    <span id="adv-toggle-label">Advanced</span>
+    <span id="adv-toggle-arrow">&#9660;</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       ADVANCED PANEL — 195px
+       ══════════════════════════════════════════════ -->
+  <div id="advanced-panel">
+    <div id="advanced-inner">
+
+      <!-- LEFT COLUMN: Dynamics knobs + Shape -->
+      <div id="adv-col-left">
+        <div id="adv-col-left-header">
+          <span class="adv-section-label dyn">Dynamics</span>
+          <span style="color:#1e1e1e;font-size:8px;">|</span>
+          <span class="adv-section-label sat">Shape</span>
+        </div>
+        <div id="adv-row-a">
+          <!-- THRESHOLD -->
+          <div class="knob-wrap" data-id="threshold" data-min="-40" data-max="0" data-default="-18" data-unit="dB" data-color="#4a90d9">
+            <svg width="38" height="38" viewBox="0 0 38 38"></svg>
+            <div class="knob-label">THR</div>
+            <div class="knob-value" id="val-threshold">-18 dB</div>
+          </div>
+          <!-- RATIO -->
+          <div class="knob-wrap" data-id="ratio" data-min="1" data-max="10" data-default="4" data-unit=":1" data-color="#4a90d9">
+            <svg width="38" height="38" viewBox="0 0 38 38"></svg>
+            <div class="knob-label">RATIO</div>
+            <div class="knob-value" id="val-ratio">4.0:1</div>
+          </div>
+          <!-- ATTACK -->
+          <div class="knob-wrap" data-id="attack_time" data-min="0.1" data-max="100" data-default="10" data-unit="ms" data-color="#4a90d9">
+            <svg width="38" height="38" viewBox="0 0 38 38"></svg>
+            <div class="knob-label">ATK</div>
+            <div class="knob-value" id="val-attack_time">10 ms</div>
+          </div>
+          <!-- RELEASE -->
+          <div class="knob-wrap" data-id="release_time" data-min="10" data-max="1000" data-default="100" data-unit="ms" data-color="#4a90d9">
+            <svg width="38" height="38" viewBox="0 0 38 38"></svg>
+            <div class="knob-label">REL</div>
+            <div class="knob-value" id="val-release_time">100 ms</div>
+          </div>
+
+          <div class="adv-divider-v"></div>
+
+          <!-- SHAPE -->
+          <div class="knob-wrap" data-id="h_curve" data-min="0" data-max="100" data-default="50" data-unit="%" data-color="#c0392b">
+            <svg width="38" height="38" viewBox="0 0 38 38"></svg>
+            <div class="knob-label">SHAPE</div>
+            <div class="knob-value" id="val-h_curve">Medium</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Tilt + M/S -->
+      <div id="adv-col-right">
+        <div id="adv-col-right-header">
+          <span class="adv-section-label sat">Post-Sat Tilt</span>
+          <span style="color:#1e1e1e;font-size:8px;">|</span>
+          <span class="adv-section-label dyn">Post-Dyn Tilt</span>
+          <span style="color:#1e1e1e;font-size:8px;">|</span>
+          <span class="adv-section-label neutral">M/S</span>
+        </div>
+        <div id="adv-row-b">
+
+          <!-- Post-Sat Tilt -->
+          <div class="tilt-group">
+            <div class="tilt-knob-row">
+              <div class="knob-wrap" data-id="sat_tilt_freq" data-min="100" data-max="10000" data-default="1000" data-unit="Hz" data-color="#c0392b">
+                <svg width="32" height="32" viewBox="0 0 32 32"></svg>
+                <div class="knob-label">FREQ</div>
+                <div class="knob-value" id="val-sat_tilt_freq">1.0 kHz</div>
+              </div>
+              <div class="knob-wrap" data-id="sat_tilt_slope" data-min="-6" data-max="6" data-default="0" data-unit="dB/oct" data-color="#c0392b">
+                <svg width="32" height="32" viewBox="0 0 32 32"></svg>
+                <div class="knob-label">SLOPE</div>
+                <div class="knob-value" id="val-sat_tilt_slope">0.0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="adv-divider-v"></div>
+
+          <!-- Post-Dyn Tilt -->
+          <div class="tilt-group">
+            <div class="tilt-knob-row">
+              <div class="knob-wrap" data-id="dyn_tilt_freq" data-min="100" data-max="10000" data-default="1000" data-unit="Hz" data-color="#4a90d9">
+                <svg width="32" height="32" viewBox="0 0 32 32"></svg>
+                <div class="knob-label">FREQ</div>
+                <div class="knob-value" id="val-dyn_tilt_freq">1.0 kHz</div>
+              </div>
+              <div class="knob-wrap" data-id="dyn_tilt_slope" data-min="-6" data-max="6" data-default="0" data-unit="dB/oct" data-color="#4a90d9">
+                <svg width="32" height="32" viewBox="0 0 32 32"></svg>
+                <div class="knob-label">SLOPE</div>
+                <div class="knob-value" id="val-dyn_tilt_slope">0.0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="adv-divider-v"></div>
+
+          <!-- M/S block -->
+          <div id="adv-ms-block">
+            <div id="ms-toggle" class="stereo">STEREO</div>
+            <div id="ms-knobs" class="hidden">
+              <div class="knob-wrap" data-id="mid_drive" data-min="0" data-max="100" data-default="50" data-unit="%" data-color="#888888">
+                <svg width="32" height="32" viewBox="0 0 32 32"></svg>
+                <div class="knob-label">MID</div>
+                <div class="knob-value" id="val-mid_drive">50%</div>
+              </div>
+              <div class="knob-wrap" data-id="side_drive" data-min="0" data-max="100" data-default="50" data-unit="%" data-color="#888888">
+                <svg width="32" height="32" viewBox="0 0 32 32"></svg>
+                <div class="knob-label">SIDE</div>
+                <div class="knob-value" id="val-side_drive">50%</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /#adv-row-b -->
+      </div><!-- /#adv-col-right -->
+
+    </div><!-- /#advanced-inner -->
+  </div><!-- /#advanced-panel -->
+
+</div><!-- /#plugin-shell -->
+
+<script>
+  /* ══════════════════════════════════════════════
+     MOCK JUCE BACKEND
+     ══════════════════════════════════════════════ */
+  window.Juce = {
+    getSliderState: (id) => ({
+      normalisedValue: 0.5,
+      valueChangedEvent: { addListener: (fn) => {} }
+    }),
+    getToggleState: (id) => ({
+      value: false,
+      valueChangedEvent: { addListener: (fn) => {} }
+    }),
+    getComboBoxState: (id) => ({
+      selectedId: 0,
+      valueChangedEvent: { addListener: (fn) => {} }
+    })
+  };
+
+  /* ══════════════════════════════════════════════
+     CONTEXT MENU DISABLED (REQUIRED)
+     ══════════════════════════════════════════════ */
+  document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    return false;
+  });
+
+  /* ══════════════════════════════════════════════
+     PARAM STATE
+     ══════════════════════════════════════════════ */
+  const params = {
+    drive:          { value: 20,    min: 0,    max: 100,   default: 20   },
+    even:           { value: 0,     min: 0,    max: 100,   default: 0    },
+    odd:            { value: 0,     min: 0,    max: 100,   default: 0    },
+    dynamics:       { value: 30,    min: 0,    max: 100,   default: 30   },
+    up:             { value: 0,     min: 0,    max: 100,   default: 0    },
+    down:           { value: 50,    min: 0,    max: 100,   default: 50   },
+    input:          { value: 0,     min: -48,  max: 10,    default: 0    },
+    mix:            { value: 100,   min: 0,    max: 100,   default: 100  },
+    output:         { value: 0,     min: -48,  max: 10,    default: 0    },
+    threshold:      { value: -18,   min: -40,  max: 0,     default: -18  },
+    ratio:          { value: 4,     min: 1,    max: 10,    default: 4    },
+    attack_time:    { value: 10,    min: 0.1,  max: 100,   default: 10   },
+    release_time:   { value: 100,   min: 10,   max: 1000,  default: 100  },
+    h_curve:        { value: 50,    min: 0,    max: 100,   default: 50   },
+    sat_tilt_freq:  { value: 1000,  min: 100,  max: 10000, default: 1000 },
+    sat_tilt_slope: { value: 0,     min: -6,   max: 6,     default: 0    },
+    dyn_tilt_freq:  { value: 1000,  min: 100,  max: 10000, default: 1000 },
+    dyn_tilt_slope: { value: 0,     min: -6,   max: 6,     default: 0    },
+    mid_drive:      { value: 50,    min: 0,    max: 100,   default: 50   },
+    side_drive:     { value: 50,    min: 0,    max: 100,   default: 50   },
+  };
+
+  /* ══════════════════════════════════════════════
+     VALUE FORMATTERS
+     ══════════════════════════════════════════════ */
+  function formatValue(id, v) {
+    if (id === 'input' || id === 'output') {
+      return (v >= 0 ? '+' : '') + v.toFixed(1) + ' dB';
+    }
+    if (id === 'threshold') return v.toFixed(1) + ' dB';
+    if (id === 'ratio') return v.toFixed(1) + ':1';
+    if (id === 'attack_time' || id === 'release_time') return Math.round(v) + ' ms';
+    if (id === 'sat_tilt_freq' || id === 'dyn_tilt_freq') {
+      return v >= 1000 ? (v / 1000).toFixed(1) + ' kHz' : Math.round(v) + ' Hz';
+    }
+    if (id === 'sat_tilt_slope' || id === 'dyn_tilt_slope') {
+      return (v >= 0 ? '+' : '') + v.toFixed(1);
+    }
+    if (id === 'h_curve') {
+      if (v < 25) return 'Soft';
+      if (v < 75) return 'Medium';
+      return 'Hard';
+    }
+    return Math.round(v) + '%';
+  }
+
+  /* ══════════════════════════════════════════════
+     SVG KNOB RENDERER
+     ══════════════════════════════════════════════ */
+  function drawKnob(svgEl, normVal, color, size, style) {
+    const cx = size / 2, cy = size / 2, r = size / 2 - 3;
+    const trackR = r - 2.5;
+
+    // Background body
+    const body = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    body.setAttribute('cx', cx);
+    body.setAttribute('cy', cy);
+    body.setAttribute('r', r);
+    body.setAttribute('fill', '#1a1a1a');
+    body.setAttribute('stroke', '#2e2e2e');
+    body.setAttribute('stroke-width', '1');
+    svgEl.appendChild(body);
+
+    // Subtle inner gradient hint
+    const specular = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    specular.setAttribute('cx', cx);
+    specular.setAttribute('cy', cy - r * 0.25);
+    specular.setAttribute('r', r * 0.55);
+    specular.setAttribute('fill', 'rgba(255,255,255,0.025)');
+    svgEl.appendChild(specular);
+
+    if (style === 'circle') {
+      // 360-degree fill indicator
+      const trackCirc = 2 * Math.PI * trackR;
+      const dashLen = normVal * trackCirc;
+
+      const trackBg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      trackBg.setAttribute('cx', cx);
+      trackBg.setAttribute('cy', cy);
+      trackBg.setAttribute('r', trackR);
+      trackBg.setAttribute('fill', 'none');
+      trackBg.setAttribute('stroke', '#252525');
+      trackBg.setAttribute('stroke-width', '2.5');
+      svgEl.appendChild(trackBg);
+
+      const arc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      arc.setAttribute('cx', cx);
+      arc.setAttribute('cy', cy);
+      arc.setAttribute('r', trackR);
+      arc.setAttribute('fill', 'none');
+      arc.setAttribute('stroke', color);
+      arc.setAttribute('stroke-width', '2.5');
+      arc.setAttribute('stroke-linecap', 'round');
+      arc.setAttribute('stroke-dasharray', dashLen + ' ' + trackCirc);
+      arc.setAttribute('stroke-dashoffset', trackCirc * 0.25);
+      arc.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+      if (normVal > 0.01) {
+        arc.setAttribute('filter', `drop-shadow(0 0 2px ${color})`);
+      }
+      svgEl.appendChild(arc);
+    } else {
+      // 270-degree arc indicator
+      const startAngle = 135 * Math.PI / 180;
+      const sweepAngle = 270 * Math.PI / 180;
+      const endAngle = startAngle + sweepAngle;
+
+      // Track background (270 degrees)
+      function describeArc(cx, cy, r, start, sweep) {
+        const endA = start + sweep;
+        const x1 = cx + r * Math.cos(start);
+        const y1 = cy + r * Math.sin(start);
+        const x2 = cx + r * Math.cos(endA);
+        const y2 = cy + r * Math.sin(endA);
+        const laf = sweep > Math.PI ? 1 : 0;
+        return `M ${x1} ${y1} A ${r} ${r} 0 ${laf} 1 ${x2} ${y2}`;
+      }
+
+      const trackPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      trackPath.setAttribute('d', describeArc(cx, cy, trackR, startAngle, sweepAngle));
+      trackPath.setAttribute('fill', 'none');
+      trackPath.setAttribute('stroke', '#252525');
+      trackPath.setAttribute('stroke-width', '2.5');
+      trackPath.setAttribute('stroke-linecap', 'round');
+      svgEl.appendChild(trackPath);
+
+      // Active arc
+      if (normVal > 0.005) {
+        const activeSweep = sweepAngle * normVal;
+        const arcPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        arcPath.setAttribute('d', describeArc(cx, cy, trackR, startAngle, activeSweep));
+        arcPath.setAttribute('fill', 'none');
+        arcPath.setAttribute('stroke', color);
+        arcPath.setAttribute('stroke-width', '2.5');
+        arcPath.setAttribute('stroke-linecap', 'round');
+        arcPath.setAttribute('filter', `drop-shadow(0 0 2.5px ${color}99)`);
+        svgEl.appendChild(arcPath);
+      }
+
+      // Dot indicator
+      const dotAngle = startAngle + sweepAngle * normVal;
+      const dotX = cx + (r - 5) * Math.cos(dotAngle);
+      const dotY = cy + (r - 5) * Math.sin(dotAngle);
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', dotX);
+      dot.setAttribute('cy', dotY);
+      dot.setAttribute('r', '2');
+      dot.setAttribute('fill', color);
+      dot.setAttribute('filter', `drop-shadow(0 0 2px ${color})`);
+      svgEl.appendChild(dot);
+    }
+  }
+
+  function renderKnob(wrap) {
+    const id    = wrap.dataset.id;
+    const min   = parseFloat(wrap.dataset.min);
+    const max   = parseFloat(wrap.dataset.max);
+    const color = wrap.dataset.color;
+    const style = wrap.dataset.style || 'arc';
+    const svg   = wrap.querySelector('svg');
+    const size  = parseFloat(svg.getAttribute('width'));
+
+    const p     = params[id];
+    const norm  = (p.value - min) / (max - min);
+
+    // Clear SVG
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    drawKnob(svg, norm, color, size, style);
+  }
+
+  function renderAllKnobs() {
+    document.querySelectorAll('.knob-wrap').forEach(renderKnob);
+  }
+
+  function updateValueDisplay(id) {
+    const el = document.getElementById('val-' + id);
+    if (el) el.textContent = formatValue(id, params[id].value);
+  }
+
+  function updateAllValues() {
+    Object.keys(params).forEach(updateValueDisplay);
+  }
+
+  /* ══════════════════════════════════════════════
+     KNOB INTERACTION (click-drag vertical)
+     ══════════════════════════════════════════════ */
+  let activeKnob = null;
+  let dragStartY = 0;
+  let dragStartVal = 0;
+
+  document.addEventListener('mousedown', (e) => {
+    const wrap = e.target.closest('.knob-wrap');
+    if (!wrap) return;
+    e.preventDefault();
+    const id = wrap.dataset.id;
+    activeKnob = { wrap, id };
+    dragStartY = e.clientY;
+    dragStartVal = params[id].value;
+    document.body.style.cursor = 'ns-resize';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!activeKnob) return;
+    e.preventDefault();
+    const { id, wrap } = activeKnob;
+    const p = params[id];
+    const range = p.max - p.min;
+    const sensitivity = range / 200; // 200px drag = full range
+    const delta = (dragStartY - e.clientY) * sensitivity;
+    p.value = Math.max(p.min, Math.min(p.max, dragStartVal + delta));
+    renderKnob(wrap);
+    updateValueDisplay(id);
+
+    // Reactive updates
+    if (['drive', 'even', 'odd'].includes(id)) drawDriveCurve();
+    if (['threshold', 'ratio', 'dynamics', 'up', 'down'].includes(id)) drawDynCurve();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!activeKnob) return;
+    activeKnob = null;
+    document.body.style.cursor = 'default';
+  });
+
+  // Double-click to reset
+  document.addEventListener('dblclick', (e) => {
+    const wrap = e.target.closest('.knob-wrap');
+    if (!wrap) return;
+    const id = wrap.dataset.id;
+    params[id].value = params[id].default;
+    renderKnob(wrap);
+    updateValueDisplay(id);
+    if (['drive', 'even', 'odd'].includes(id)) drawDriveCurve();
+    if (['threshold', 'ratio', 'dynamics', 'up', 'down'].includes(id)) drawDynCurve();
+  });
+
+  /* ══════════════════════════════════════════════
+     PRE/POST TOGGLE
+     ══════════════════════════════════════════════ */
+  let prePostState = 0; // 0 = DYN→SAT, 1 = SAT→DYN
+  const prePostToggle = document.getElementById('pre-post-toggle');
+  const toggleLeft    = document.getElementById('toggle-label-left');
+  const toggleRight   = document.getElementById('toggle-label-right');
+  const toggleArrow   = document.getElementById('toggle-arrow');
+
+  prePostToggle.addEventListener('click', () => {
+    prePostState = prePostState === 0 ? 1 : 0;
+    if (prePostState === 0) {
+      prePostToggle.className = 'state-dyn-sat';
+      toggleLeft.textContent  = 'DYN';
+      toggleRight.textContent = 'SAT';
+      toggleArrow.innerHTML   = '&#8594;';
+    } else {
+      prePostToggle.className = 'state-sat-dyn';
+      toggleLeft.textContent  = 'SAT';
+      toggleRight.textContent = 'DYN';
+      toggleArrow.innerHTML   = '&#8594;';
+    }
+    console.log('pre_post changed:', prePostState === 0 ? 'DYN→SAT' : 'SAT→DYN');
+  });
+
+  /* ══════════════════════════════════════════════
+     ADVANCED PANEL TOGGLE
+     ══════════════════════════════════════════════ */
+  const advToggleBar = document.getElementById('advanced-toggle-bar');
+  const advPanel     = document.getElementById('advanced-panel');
+  let advOpen = false;
+
+  advToggleBar.addEventListener('click', () => {
+    advOpen = !advOpen;
+    advPanel.classList.toggle('open', advOpen);
+    advToggleBar.classList.toggle('open', advOpen);
+    console.log('Advanced panel:', advOpen ? 'expanded' : 'collapsed');
+  });
+
+  /* ══════════════════════════════════════════════
+     M/S TOGGLE
+     ══════════════════════════════════════════════ */
+  let msActive = false;
+  const msToggle = document.getElementById('ms-toggle');
+  const msKnobs  = document.getElementById('ms-knobs');
+
+  msToggle.addEventListener('click', () => {
+    msActive = !msActive;
+    msToggle.textContent = msActive ? 'M/S' : 'STEREO';
+    msToggle.className   = msActive ? 'ms-active' : 'stereo';
+    msKnobs.classList.toggle('hidden', !msActive);
+    console.log('ms_enable changed:', msActive ? 1 : 0);
+  });
+
+  /* ══════════════════════════════════════════════
+     DRIVE CURVE — SVG transfer function
+     ══════════════════════════════════════════════ */
+  function computeTransferCurve(drive, even, odd) {
+    const d = drive / 100;
+    const e = even / 100;
+    const o = odd / 100;
+    return x => {
+      const driven   = x * (1 + d * 3);
+      const softclip = driven / (1 + Math.abs(driven));
+      const evenShift = e * 0.3 * (x * x);
+      const oddClip   = o * 0.2 * (driven * driven * driven) / (1 + driven * driven);
+      return Math.max(-1, Math.min(1, softclip + evenShift - oddClip));
+    };
+  }
+
+  function drawDriveCurve() {
+    const svgEl = document.getElementById('drive-curve-svg');
+    const W = 188, H = 76;
+    const drive = params.drive.value;
+    const even  = params.even.value;
+    const odd   = params.odd.value;
+    const fn    = computeTransferCurve(drive, even, odd);
+
+    // Build path
+    const steps = 120;
+    let d = '';
+    for (let i = 0; i <= steps; i++) {
+      const t    = i / steps;
+      const xIn  = t * 2 - 1;              // -1 to +1
+      const yOut = fn(xIn);                 // -1 to +1
+      const px   = t * W;
+      const py   = ((1 - yOut) / 2) * H;
+      d += (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1) + ' ';
+    }
+
+    while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+
+    // Grid
+    const gridLines = [[W/2, 0, W/2, H], [0, H/2, W, H/2]];
+    gridLines.forEach(([x1, y1, x2, y2]) => {
+      const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+      l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+      l.setAttribute('stroke', '#252525');
+      l.setAttribute('stroke-width', '0.5');
+      svgEl.appendChild(l);
+    });
+
+    // Identity line (faint)
+    const identity = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    identity.setAttribute('x1', 0);   identity.setAttribute('y1', H);
+    identity.setAttribute('x2', W);   identity.setAttribute('y2', 0);
+    identity.setAttribute('stroke', '#2a2a2a');
+    identity.setAttribute('stroke-width', '0.5');
+    svgEl.appendChild(identity);
+
+    // Glow layer
+    const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    glowPath.setAttribute('d', d);
+    glowPath.setAttribute('fill', 'none');
+    glowPath.setAttribute('stroke', 'rgba(192, 57, 43, 0.35)');
+    glowPath.setAttribute('stroke-width', '3');
+    glowPath.setAttribute('stroke-linejoin', 'round');
+    glowPath.setAttribute('stroke-linecap', 'round');
+    svgEl.appendChild(glowPath);
+
+    // Main curve
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#c0392b');
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('stroke-linecap', 'round');
+    svgEl.appendChild(path);
+  }
+
+  /* ══════════════════════════════════════════════
+     DYNAMICS CURVE — SVG compressor transfer
+     ══════════════════════════════════════════════ */
+  function computeCompressorCurve(threshold, ratio, dynamics, up, down) {
+    const kneeWidth = 6 * (dynamics / 100);
+    const downRatio = 1 + (ratio - 1) * (down / 100);
+    const upRatio   = 1 + (up / 100) * 3;
+    return inputDb => {
+      let outputDb = inputDb;
+      if (downRatio > 1.001) {
+        const kneeLow  = threshold - kneeWidth / 2;
+        const kneeHigh = threshold + kneeWidth / 2;
+        if (inputDb > kneeHigh) {
+          outputDb = threshold + (inputDb - threshold) / downRatio;
+        } else if (inputDb > kneeLow) {
+          const t = (inputDb - kneeLow) / kneeWidth;
+          outputDb = inputDb + (1 / downRatio - 1) * t * t * kneeWidth / 2;
+        }
+      }
+      if (upRatio > 1.001 && inputDb < threshold) {
+        const below = threshold - inputDb;
+        outputDb = threshold - below / upRatio;
+      }
+      return Math.max(-60, Math.min(0, outputDb));
+    };
+  }
+
+  function drawDynCurve() {
+    const svgEl    = document.getElementById('dyn-curve-svg');
+    const W = 158, H = 76;
+    const threshold = params.threshold.value;
+    const ratio     = params.ratio.value;
+    const dynamics  = params.dynamics.value;
+    const up        = params.up.value;
+    const down      = params.down.value;
+    const fn        = computeCompressorCurve(threshold, ratio, dynamics, up, down);
+
+    const steps = 100;
+    let d = '';
+    for (let i = 0; i <= steps; i++) {
+      const t     = i / steps;
+      const xIn   = -60 + t * 60;       // -60 to 0 dB
+      const yOut  = fn(xIn);             // -60 to 0 dB
+      const px    = t * W;
+      const py    = ((0 - yOut) / 60) * H;
+      d += (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1) + ' ';
+    }
+
+    while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+
+    // Grid
+    for (let db = -60; db <= 0; db += 20) {
+      const x = ((db + 60) / 60) * W;
+      const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      l.setAttribute('x1', x); l.setAttribute('y1', 0);
+      l.setAttribute('x2', x); l.setAttribute('y2', H);
+      l.setAttribute('stroke', '#202020');
+      l.setAttribute('stroke-width', '0.5');
+      svgEl.appendChild(l);
+    }
+    for (let db = -60; db <= 0; db += 20) {
+      const y = ((0 - db) / 60) * H;
+      const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      l.setAttribute('x1', 0); l.setAttribute('y1', y);
+      l.setAttribute('x2', W); l.setAttribute('y2', y);
+      l.setAttribute('stroke', '#202020');
+      l.setAttribute('stroke-width', '0.5');
+      svgEl.appendChild(l);
+    }
+
+    // Identity line
+    const identity = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    identity.setAttribute('x1', 0);   identity.setAttribute('y1', H);
+    identity.setAttribute('x2', W);   identity.setAttribute('y2', 0);
+    identity.setAttribute('stroke', '#2a2a2a');
+    identity.setAttribute('stroke-width', '0.5');
+    svgEl.appendChild(identity);
+
+    // Threshold line
+    const thX = ((threshold + 60) / 60) * W;
+    const thLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    thLine.setAttribute('x1', thX); thLine.setAttribute('y1', 0);
+    thLine.setAttribute('x2', thX); thLine.setAttribute('y2', H);
+    thLine.setAttribute('stroke', 'rgba(74, 144, 217, 0.25)');
+    thLine.setAttribute('stroke-width', '0.75');
+    thLine.setAttribute('stroke-dasharray', '2 3');
+    svgEl.appendChild(thLine);
+
+    // Glow layer
+    const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    glowPath.setAttribute('d', d);
+    glowPath.setAttribute('fill', 'none');
+    glowPath.setAttribute('stroke', 'rgba(74, 144, 217, 0.35)');
+    glowPath.setAttribute('stroke-width', '3');
+    glowPath.setAttribute('stroke-linejoin', 'round');
+    svgEl.appendChild(glowPath);
+
+    // Main curve
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#4a90d9');
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('stroke-linejoin', 'round');
+    svgEl.appendChild(path);
+  }
+
+  /* ══════════════════════════════════════════════
+     METERS — animated simulation
+     ══════════════════════════════════════════════ */
+  const meterFills = {
+    inL:  document.getElementById('in-l-fill'),
+    inR:  document.getElementById('in-r-fill'),
+    outL: document.getElementById('out-l-fill'),
+    outR: document.getElementById('out-r-fill'),
+  };
+
+  let meterPhase = 0;
+
+  function getMeterColor(pct) {
+    if (pct < 70) return '#22c55e';
+    if (pct < 85) return '#f59e0b';
+    return '#ef4444';
+  }
+
+  function updateMeters() {
+    meterPhase += 0.04;
+    const base   = 55 + Math.sin(meterPhase * 0.7) * 20;
+    const transL = base + Math.sin(meterPhase * 1.3) * 8 + Math.random() * 6;
+    const transR = base + Math.sin(meterPhase * 1.1 + 0.4) * 8 + Math.random() * 6;
+    const outL   = Math.min(100, transL * 1.05 + Math.random() * 4);
+    const outR   = Math.min(100, transR * 1.05 + Math.random() * 4);
+
+    function setMeter(fill, pct) {
+      pct = Math.max(0, Math.min(100, pct));
+      fill.style.height    = pct + '%';
+      fill.style.background = getMeterColor(pct);
+    }
+
+    setMeter(meterFills.inL,  transL);
+    setMeter(meterFills.inR,  transR);
+    setMeter(meterFills.outL, outL);
+    setMeter(meterFills.outR, outR);
+  }
+
+  /* ══════════════════════════════════════════════
+     INIT
+     ══════════════════════════════════════════════ */
+  document.addEventListener('DOMContentLoaded', () => {
+    renderAllKnobs();
+    updateAllValues();
+    drawDriveCurve();
+    drawDynCurve();
+    setInterval(updateMeters, 80);
+  });
+</script>
+</body>
+</html>

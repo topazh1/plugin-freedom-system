@@ -1,0 +1,825 @@
+---
+# BugosEQ - UI Specification v1
+# 4-Band Dynamic EQ with Analog Character
+# Neve/API-inspired transformer saturation
+# Vintage Hardware aesthetic
+
+meta:
+  plugin: BugosEQ
+  version: 1
+  generated: 2026-02-27
+  aesthetic: vintage-hardware
+  description: 4-band dynamic EQ with per-band dynamics modes and analog saturation
+
+window:
+  width: 820
+  height: 620
+  resizable: false
+  title: BugosEQ
+
+styling:
+  colors:
+    background: "#2a1a0a"
+    bg_dark: "#2a1a0a"
+    bg_mid: "#4a3a2a"
+    bg_very_dark: "#1a0a00"
+    bg_surface: "#3a2a1a"
+    accent_brass_light: "#d4a574"
+    accent_brass: "#c49564"
+    accent_brass_dark: "#a08050"
+    accent_red: "#b8453d"
+    text_primary: "#c49564"
+    control_highlight: "#3a2a1a"
+    control_mid: "#2f2015"
+    control_dark: "#1a0a00"
+    shadow_heavy: "rgba(0,0,0,0.8)"
+    shadow_medium: "rgba(0,0,0,0.6)"
+    brass_glow: "rgba(212,165,116,0.4)"
+    eq_display_bg: "#0e0804"
+    global_section_bg: "#3a2410"
+    meter_green: "#8aad5a"
+    meter_amber: "#c49564"
+    meter_red: "#b8453d"
+  fonts:
+    primary: "Helvetica Neue, Helvetica, Arial, sans-serif"
+    weight_light: 300
+    weight_medium: 500
+    size_title: 18
+    size_section_label: 9
+    size_parameter_label: 8
+    size_display_label: 7
+    letter_spacing_title: "0.4em"
+    letter_spacing_label: "0.3em"
+
+# Layout regions
+layout:
+  header:
+    x: 0
+    y: 0
+    width: 820
+    height: 40
+  eq_display:
+    x: 0
+    y: 40
+    width: 820
+    height: 160
+  band_strips:
+    x: 0
+    y: 200
+    width: 820
+    height: 340
+    band_width: 205
+  global_section:
+    x: 0
+    y: 540
+    width: 820
+    height: 80
+
+# Decorative / non-parameter regions
+decorative:
+  - id: eq_display_region
+    type: display
+    region: eq_display
+    description: "EQ curve display with frequency grid lines — visual only in mockup"
+    bg: "#0e0804"
+    grid_color: "#3a2a1a"
+    curve_color: "#c49564"
+
+  - id: band1_gr_meter
+    type: meter_bar
+    x: 20
+    y: 512
+    width: 165
+    height: 8
+    description: "Band 1 gain reduction / expansion meter"
+
+  - id: band2_gr_meter
+    type: meter_bar
+    x: 225
+    y: 512
+    width: 165
+    height: 8
+    description: "Band 2 gain reduction / expansion meter"
+
+  - id: band3_gr_meter
+    type: meter_bar
+    x: 430
+    y: 512
+    width: 165
+    height: 8
+    description: "Band 3 gain reduction / expansion meter"
+
+  - id: band4_gr_meter
+    type: meter_bar
+    x: 635
+    y: 512
+    width: 165
+    height: 8
+    description: "Band 4 gain reduction / expansion meter"
+
+  - id: input_meter_header
+    type: meter_bar
+    x: 600
+    y: 8
+    width: 100
+    height: 10
+    description: "Input level meter in header"
+
+  - id: output_meter_header
+    type: meter_bar
+    x: 710
+    y: 8
+    width: 100
+    height: 10
+    description: "Output level meter in header"
+
+  - id: input_meter_global
+    type: meter_bar
+    x: 600
+    y: 556
+    width: 185
+    height: 10
+    description: "Input level meter in global section"
+
+  - id: output_meter_global
+    type: meter_bar
+    x: 600
+    y: 578
+    width: 185
+    height: 10
+    description: "Output level meter in global section"
+
+# All interactive controls
+controls:
+  # ─── GLOBAL PARAMETERS ───────────────────────────────────────────
+
+  - id: processing_mode
+    type: combo
+    label: "STEREO / M-S"
+    position:
+      x: 320
+      y: 10
+    size:
+      width: 160
+      height: 24
+    options:
+      - id: 0
+        label: "STEREO"
+      - id: 1
+        label: "M-S"
+    default: 0
+    section: header
+
+  - id: drive
+    type: slider
+    label: "DRIVE"
+    position:
+      x: 50
+      y: 552
+    size:
+      width: 130
+      height: 22
+    range:
+      min: 0.0
+      max: 100.0
+    default: 20.0
+    unit: "%"
+    section: global
+    visual_style: knob_large
+    knob_size: 65
+
+  - id: output_gain
+    type: slider
+    label: "OUTPUT"
+    position:
+      x: 260
+      y: 552
+    size:
+      width: 130
+      height: 22
+    range:
+      min: -18.0
+      max: 18.0
+    default: 0.0
+    unit: "dB"
+    section: global
+    visual_style: knob_large
+    knob_size: 65
+
+  # ─── BAND 1 — LF SHELF ───────────────────────────────────────────
+
+  - id: band1_mode
+    type: combo
+    label: "MODE"
+    position:
+      x: 18
+      y: 232
+    size:
+      width: 169
+      height: 24
+    options:
+      - id: 0
+        label: "STATIC"
+      - id: 1
+        label: "EXP"
+      - id: 2
+        label: "UP"
+      - id: 3
+        label: "DN"
+    default: 0
+    section: band1
+
+  - id: band1_freq
+    type: slider
+    label: "FREQ"
+    position:
+      x: 25
+      y: 270
+    size:
+      width: 50
+      height: 50
+    range:
+      min: 20.0
+      max: 20000.0
+    default: 80.0
+    unit: "Hz"
+    section: band1
+    visual_style: knob
+    knob_size: 50
+
+  - id: band1_gain
+    type: slider
+    label: "GAIN"
+    position:
+      x: 85
+      y: 270
+    size:
+      width: 50
+      height: 50
+    range:
+      min: -18.0
+      max: 18.0
+    default: 0.0
+    unit: "dB"
+    section: band1
+    visual_style: knob
+    knob_size: 50
+
+  - id: band1_q
+    type: slider
+    label: "Q"
+    position:
+      x: 61
+      y: 342
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 0.1
+      max: 10.0
+    default: 0.7
+    section: band1
+    visual_style: knob
+    knob_size: 38
+
+  - id: band1_threshold
+    type: slider
+    label: "THR"
+    position:
+      x: 38
+      y: 398
+    size:
+      width: 38
+      height: 38
+    range:
+      min: -60.0
+      max: 0.0
+    default: -24.0
+    unit: "dBFS"
+    section: band1
+    visual_style: knob
+    knob_size: 38
+
+  - id: band1_ratio
+    type: slider
+    label: "RATIO"
+    position:
+      x: 84
+      y: 398
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 1.0
+      max: 20.0
+    default: 4.0
+    section: band1
+    visual_style: knob
+    knob_size: 38
+
+  - id: band1_attack
+    type: slider
+    label: "ATCK"
+    position:
+      x: 38
+      y: 454
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 0.1
+      max: 300.0
+    default: 10.0
+    unit: "ms"
+    section: band1
+    visual_style: knob
+    knob_size: 38
+
+  - id: band1_release
+    type: slider
+    label: "REL"
+    position:
+      x: 84
+      y: 454
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 5.0
+      max: 2000.0
+    default: 100.0
+    unit: "ms"
+    section: band1
+    visual_style: knob
+    knob_size: 38
+
+  # ─── BAND 2 — LO MID ─────────────────────────────────────────────
+
+  - id: band2_mode
+    type: combo
+    label: "MODE"
+    position:
+      x: 223
+      y: 232
+    size:
+      width: 169
+      height: 24
+    options:
+      - id: 0
+        label: "STATIC"
+      - id: 1
+        label: "EXP"
+      - id: 2
+        label: "UP"
+      - id: 3
+        label: "DN"
+    default: 0
+    section: band2
+
+  - id: band2_freq
+    type: slider
+    label: "FREQ"
+    position:
+      x: 230
+      y: 270
+    size:
+      width: 50
+      height: 50
+    range:
+      min: 20.0
+      max: 20000.0
+    default: 400.0
+    unit: "Hz"
+    section: band2
+    visual_style: knob
+    knob_size: 50
+
+  - id: band2_gain
+    type: slider
+    label: "GAIN"
+    position:
+      x: 290
+      y: 270
+    size:
+      width: 50
+      height: 50
+    range:
+      min: -18.0
+      max: 18.0
+    default: 0.0
+    unit: "dB"
+    section: band2
+    visual_style: knob
+    knob_size: 50
+
+  - id: band2_q
+    type: slider
+    label: "Q"
+    position:
+      x: 266
+      y: 342
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 0.1
+      max: 10.0
+    default: 1.0
+    section: band2
+    visual_style: knob
+    knob_size: 38
+
+  - id: band2_threshold
+    type: slider
+    label: "THR"
+    position:
+      x: 243
+      y: 398
+    size:
+      width: 38
+      height: 38
+    range:
+      min: -60.0
+      max: 0.0
+    default: -24.0
+    unit: "dBFS"
+    section: band2
+    visual_style: knob
+    knob_size: 38
+
+  - id: band2_ratio
+    type: slider
+    label: "RATIO"
+    position:
+      x: 289
+      y: 398
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 1.0
+      max: 20.0
+    default: 4.0
+    section: band2
+    visual_style: knob
+    knob_size: 38
+
+  - id: band2_attack
+    type: slider
+    label: "ATCK"
+    position:
+      x: 243
+      y: 454
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 0.1
+      max: 300.0
+    default: 10.0
+    unit: "ms"
+    section: band2
+    visual_style: knob
+    knob_size: 38
+
+  - id: band2_release
+    type: slider
+    label: "REL"
+    position:
+      x: 289
+      y: 454
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 5.0
+      max: 2000.0
+    default: 100.0
+    unit: "ms"
+    section: band2
+    visual_style: knob
+    knob_size: 38
+
+  # ─── BAND 3 — HI MID ─────────────────────────────────────────────
+
+  - id: band3_mode
+    type: combo
+    label: "MODE"
+    position:
+      x: 428
+      y: 232
+    size:
+      width: 169
+      height: 24
+    options:
+      - id: 0
+        label: "STATIC"
+      - id: 1
+        label: "EXP"
+      - id: 2
+        label: "UP"
+      - id: 3
+        label: "DN"
+    default: 0
+    section: band3
+
+  - id: band3_freq
+    type: slider
+    label: "FREQ"
+    position:
+      x: 435
+      y: 270
+    size:
+      width: 50
+      height: 50
+    range:
+      min: 20.0
+      max: 20000.0
+    default: 2500.0
+    unit: "Hz"
+    section: band3
+    visual_style: knob
+    knob_size: 50
+
+  - id: band3_gain
+    type: slider
+    label: "GAIN"
+    position:
+      x: 495
+      y: 270
+    size:
+      width: 50
+      height: 50
+    range:
+      min: -18.0
+      max: 18.0
+    default: 0.0
+    unit: "dB"
+    section: band3
+    visual_style: knob
+    knob_size: 50
+
+  - id: band3_q
+    type: slider
+    label: "Q"
+    position:
+      x: 471
+      y: 342
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 0.1
+      max: 10.0
+    default: 1.0
+    section: band3
+    visual_style: knob
+    knob_size: 38
+
+  - id: band3_threshold
+    type: slider
+    label: "THR"
+    position:
+      x: 448
+      y: 398
+    size:
+      width: 38
+      height: 38
+    range:
+      min: -60.0
+      max: 0.0
+    default: -24.0
+    unit: "dBFS"
+    section: band3
+    visual_style: knob
+    knob_size: 38
+
+  - id: band3_ratio
+    type: slider
+    label: "RATIO"
+    position:
+      x: 494
+      y: 398
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 1.0
+      max: 20.0
+    default: 4.0
+    section: band3
+    visual_style: knob
+    knob_size: 38
+
+  - id: band3_attack
+    type: slider
+    label: "ATCK"
+    position:
+      x: 448
+      y: 454
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 0.1
+      max: 300.0
+    default: 10.0
+    unit: "ms"
+    section: band3
+    visual_style: knob
+    knob_size: 38
+
+  - id: band3_release
+    type: slider
+    label: "REL"
+    position:
+      x: 494
+      y: 454
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 5.0
+      max: 2000.0
+    default: 100.0
+    unit: "ms"
+    section: band3
+    visual_style: knob
+    knob_size: 38
+
+  # ─── BAND 4 — HF SHELF ───────────────────────────────────────────
+
+  - id: band4_mode
+    type: combo
+    label: "MODE"
+    position:
+      x: 633
+      y: 232
+    size:
+      width: 169
+      height: 24
+    options:
+      - id: 0
+        label: "STATIC"
+      - id: 1
+        label: "EXP"
+      - id: 2
+        label: "UP"
+      - id: 3
+        label: "DN"
+    default: 0
+    section: band4
+
+  - id: band4_freq
+    type: slider
+    label: "FREQ"
+    position:
+      x: 640
+      y: 270
+    size:
+      width: 50
+      height: 50
+    range:
+      min: 20.0
+      max: 20000.0
+    default: 10000.0
+    unit: "Hz"
+    section: band4
+    visual_style: knob
+    knob_size: 50
+
+  - id: band4_gain
+    type: slider
+    label: "GAIN"
+    position:
+      x: 700
+      y: 270
+    size:
+      width: 50
+      height: 50
+    range:
+      min: -18.0
+      max: 18.0
+    default: 0.0
+    unit: "dB"
+    section: band4
+    visual_style: knob
+    knob_size: 50
+
+  - id: band4_q
+    type: slider
+    label: "Q"
+    position:
+      x: 676
+      y: 342
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 0.1
+      max: 10.0
+    default: 0.7
+    section: band4
+    visual_style: knob
+    knob_size: 38
+
+  - id: band4_threshold
+    type: slider
+    label: "THR"
+    position:
+      x: 653
+      y: 398
+    size:
+      width: 38
+      height: 38
+    range:
+      min: -60.0
+      max: 0.0
+    default: -24.0
+    unit: "dBFS"
+    section: band4
+    visual_style: knob
+    knob_size: 38
+
+  - id: band4_ratio
+    type: slider
+    label: "RATIO"
+    position:
+      x: 699
+      y: 398
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 1.0
+      max: 20.0
+    default: 4.0
+    section: band4
+    visual_style: knob
+    knob_size: 38
+
+  - id: band4_attack
+    type: slider
+    label: "ATCK"
+    position:
+      x: 653
+      y: 454
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 0.1
+      max: 300.0
+    default: 10.0
+    unit: "ms"
+    section: band4
+    visual_style: knob
+    knob_size: 38
+
+  - id: band4_release
+    type: slider
+    label: "REL"
+    position:
+      x: 699
+      y: 454
+    size:
+      width: 38
+      height: 38
+    range:
+      min: 5.0
+      max: 2000.0
+    default: 100.0
+    unit: "ms"
+    section: band4
+    visual_style: knob
+    knob_size: 38
+
+# Band section metadata (for code generation hints)
+band_sections:
+  - id: band1
+    label: "LF SHELF"
+    filter_type: low_shelf
+    default_freq: 80.0
+    x_offset: 0
+    width: 205
+
+  - id: band2
+    label: "LO MID"
+    filter_type: peak
+    default_freq: 400.0
+    x_offset: 205
+    width: 205
+
+  - id: band3
+    label: "HI MID"
+    filter_type: peak
+    default_freq: 2500.0
+    x_offset: 410
+    width: 205
+
+  - id: band4
+    label: "HF SHELF"
+    filter_type: high_shelf
+    default_freq: 10000.0
+    x_offset: 615
+    width: 205

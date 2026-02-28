@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NBS DynaDrive — UI Mockup v3</title>
+
+  <style>
+    /* ══════════════════════════════════════════════
+       WEBVIEW CRITICAL CONSTRAINTS
+       ══════════════════════════════════════════════ */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+      overflow: hidden;
+      background: #0a0a0a;
+      color: #e8e8e8;
+      font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ══════════════════════════════════════════════
+       PLUGIN SHELL
+       ══════════════════════════════════════════════ */
+    #plugin-shell {
+      width: 740px;
+      background: #141414;
+      position: relative;
+      border: 1px solid #2a2a2a;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    /* ══════════════════════════════════════════════
+       MAIN PANEL — 420px tall (v2: +50px for curve displays)
+       ══════════════════════════════════════════════ */
+    #main-panel {
+      width: 740px;
+      height: 420px;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    /* ══════════════════════════════════════════════
+       SECTION LAYOUT
+       ══════════════════════════════════════════════ */
+    .section {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 16px;
+      padding-bottom: 12px;
+    }
+
+    #section-saturation {
+      width: 228px;
+      min-width: 228px;
+      border-right: 1px solid #2a2a2a;
+      background: linear-gradient(180deg, rgba(192,57,43,0.04) 0%, transparent 60%);
+    }
+
+    #section-center {
+      flex: 1;
+      border-right: 1px solid #2a2a2a;
+      background: #141414;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0;
+    }
+
+    #section-dynamics {
+      width: 186px;
+      min-width: 186px;
+      border-right: 1px solid #2a2a2a;
+      background: linear-gradient(180deg, rgba(74,144,217,0.04) 0%, transparent 60%);
+    }
+
+    #section-meters {
+      width: 82px;
+      min-width: 82px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 12px;
+      padding-bottom: 10px;
+    }
+
+    /* ══════════════════════════════════════════════
+       SECTION HEADERS
+       ══════════════════════════════════════════════ */
+    .section-header {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .section-header.sat  { color: #c0392b; }
+    .section-header.dyn  { color: #4a90d9; }
+    .section-header.cent { color: #555; font-size: 8px; letter-spacing: 0.22em; }
+
+    /* ══════════════════════════════════════════════
+       KNOB COMPONENT
+       ══════════════════════════════════════════════ */
+    .knob-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: ns-resize;
+    }
+
+    .knob-wrap svg {
+      display: block;
+      overflow: hidden;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.7));
+    }
+
+    .knob-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.10em;
+      color: #777;
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    .knob-value {
+      font-size: 9px;
+      font-weight: 400;
+      color: #484848;
+      text-align: center;
+      min-height: 12px;
+    }
+
+    /* ══════════════════════════════════════════════
+       KNOB ROWS — flex layout for each section row
+       ══════════════════════════════════════════════ */
+    .knob-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 18px;
+      width: 100%;
+      padding: 0 12px;
+    }
+
+    /* ══════════════════════════════════════════════
+       SATURATION SECTION INTERNALS
+       ══════════════════════════════════════════════ */
+    #sat-main {
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+
+    #sat-pair {
+      margin-bottom: 14px;
+    }
+
+    /* ══════════════════════════════════════════════
+       DRIVE CURVE DISPLAY
+       ══════════════════════════════════════════════ */
+    #drive-curve-wrap {
+      width: 182px;
+      height: 92px;
+      background: #0e0e0e;
+      border: 1px solid rgba(192, 57, 43, 0.30);
+      box-shadow: inset 0 0 10px rgba(192, 57, 43, 0.07);
+      position: relative;
+      border-radius: 3px;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    #drive-curve-label {
+      position: absolute;
+      top: 5px;
+      left: 7px;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: rgba(192, 57, 43, 0.75);
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    #drive-curve-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ══════════════════════════════════════════════
+       DYN CURVE DISPLAY
+       ══════════════════════════════════════════════ */
+    #dyn-curve-wrap {
+      width: 158px;
+      height: 92px;
+      background: #0e0e0e;
+      border: 1px solid rgba(74, 144, 217, 0.30);
+      box-shadow: inset 0 0 10px rgba(74, 144, 217, 0.07);
+      position: relative;
+      border-radius: 3px;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    #dyn-curve-label {
+      position: absolute;
+      top: 5px;
+      left: 7px;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: rgba(74, 144, 217, 0.75);
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    #dyn-curve-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ══════════════════════════════════════════════
+       CENTER SECTION INTERNALS
+       ══════════════════════════════════════════════ */
+    #center-title-block {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 18px 16px 10px;
+      border-bottom: 1px solid #222;
+      margin-bottom: 0;
+    }
+
+    #plugin-name {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #e8e8e8;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+
+    #plugin-tagline {
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 0.10em;
+      color: #424242;
+      text-align: center;
+    }
+
+    #center-body {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-evenly;
+      padding: 10px 16px 16px;
+    }
+
+    /* ══════════════════════════════════════════════
+       PRE/POST PILL TOGGLE (Change 5)
+       ══════════════════════════════════════════════ */
+    #prepost-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 140px;
+      height: 36px;
+      border-radius: 50px;
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #888;
+      transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* DYN→SAT state: blue (dynamics first) */
+    #prepost-toggle.state-dyn {
+      background: #4a90d9;
+      color: #ffffff;
+      border-color: #6aa8e8;
+      box-shadow: 0 0 14px rgba(74, 144, 217, 0.45), 0 0 4px rgba(74, 144, 217, 0.3);
+    }
+
+    /* SAT→DYN state: dark red (saturation first) */
+    #prepost-toggle.state-sat {
+      background: #8b1a1a;
+      color: #ffffff;
+      border-color: #a52a2a;
+      box-shadow: 0 0 14px rgba(192, 57, 43, 0.40), 0 0 4px rgba(192, 57, 43, 0.25);
+    }
+
+    #prepost-toggle:hover {
+      filter: brightness(1.15);
+    }
+
+    #prepost-label {
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════════════════
+       INPUT / MIX / OUTPUT KNOB ROW
+       ══════════════════════════════════════════════ */
+    #center-knob-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+    }
+
+    /* ══════════════════════════════════════════════
+       DYNAMICS SECTION INTERNALS
+       ══════════════════════════════════════════════ */
+    #dyn-main {
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+
+    #dyn-pair {
+      margin-bottom: 14px;
+    }
+
+    /* ══════════════════════════════════════════════
+       METER SECTION
+       ══════════════════════════════════════════════ */
+    .meter-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meter-label {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #555;
+      text-align: center;
+    }
+
+    .meter-bar {
+      width: 8px;
+      height: 300px;
+      background: #1a1a1a;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #222;
+    }
+
+    .meter-group-label {
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #555;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .meter-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .meter-pair {
+      display: flex;
+      flex-direction: row;
+      gap: 2px;
+      align-items: flex-end;
+    }
+
+    .meter-ch-label {
+      font-size: 6px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #444;
+      text-align: center;
+    }
+
+    .meter-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      border-radius: 2px;
+      transition: height 80ms ease;
+    }
+
+    #meters-row {
+      display: flex;
+      flex-direction: row;
+      gap: 5px;
+      align-items: flex-start;
+      justify-content: center;
+      flex: 1;
+    }
+
+    /* ══════════════════════════════════════════════
+       ADVANCED TOGGLE BAR
+       ══════════════════════════════════════════════ */
+    #advanced-toggle-bar {
+      width: 100%;
+      height: 30px;
+      background: #1a1a1a;
+      border-top: 1px solid #2a2a2a;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      gap: 8px;
+      transition: background 150ms ease;
+    }
+
+    #advanced-toggle-bar:hover {
+      background: #202020;
+    }
+
+    #adv-bar-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: #555;
+      text-transform: uppercase;
+    }
+
+    #adv-bar-arrow {
+      font-size: 9px;
+      color: #444;
+      transition: transform 250ms ease;
+    }
+
+    #adv-bar-arrow.open { transform: rotate(180deg); }
+
+    /* ══════════════════════════════════════════════
+       ADVANCED PANEL
+       ══════════════════════════════════════════════ */
+    #advanced-panel {
+      width: 740px;
+      height: 0;
+      overflow: hidden;
+      background: #161616;
+      transition: height 280ms cubic-bezier(0.4, 0, 0.2, 1);
+      border-top: 1px solid #1e1e1e;
+    }
+
+    #advanced-panel.open {
+      height: 220px;
+    }
+
+    #advanced-panel-inner {
+      width: 100%;
+      height: 220px;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      padding: 20px 30px;
+      gap: 0;
+    }
+
+    .adv-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .adv-section-label {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .adv-section-label.sat  { color: rgba(192,57,43,0.7); }
+    .adv-section-label.dyn  { color: rgba(74,144,217,0.7); }
+    .adv-section-label.util { color: rgba(136,136,136,0.6); }
+
+    .adv-knob-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .adv-divider {
+      width: 1px;
+      height: 120px;
+      background: #2a2a2a;
+      margin: 0 24px;
+      align-self: center;
+    }
+
+    /* Combo box style */
+    .adv-combo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+
+    .adv-combo-label {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: #666;
+      text-transform: uppercase;
+    }
+
+    .adv-combo select {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      color: #ccc;
+      font-size: 11px;
+      font-family: inherit;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 130px;
+      height: 28px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .adv-combo select:focus {
+      border-color: rgba(192,57,43,0.5);
+    }
+
+    /* M/S pill toggle */
+    .ms-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100px;
+      height: 26px;
+      border-radius: 50px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #888;
+      transition: all 150ms ease;
+    }
+
+    .ms-toggle.active {
+      background: #888;
+      color: #141414;
+      border-color: #aaa;
+    }
+
+    /* M/S knobs hidden by default */
+    #ms-knobs {
+      display: flex;
+      flex-direction: row;
+      gap: 14px;
+      opacity: 0.3;
+      transition: opacity 200ms ease;
+      pointer-events: none;
+    }
+
+    #ms-knobs.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ══════════════════════════════════════════════
+       SECTION COLUMN DIVIDER STYLING
+       ══════════════════════════════════════════════ */
+    .col-divider {
+      width: 1px;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        #2a2a2a 8%,
+        #2a2a2a 92%,
+        transparent 100%
+      );
+    }
+
+    /* ══════════════════════════════════════════════
+       TOOLTIP GHOST (value popup)
+       ══════════════════════════════════════════════ */
+    #value-tooltip {
+      position: fixed;
+      background: rgba(0,0,0,0.85);
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 10px;
+      color: #e0e0e0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 80ms ease;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+
+    #value-tooltip.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div id="plugin-shell">
+
+  <!-- ══════════════════════════════════════════
+       MAIN PANEL
+       ══════════════════════════════════════════ -->
+  <div id="main-panel">
+
+    <!-- ── SATURATION SECTION ───────────────── -->
+    <div id="section-saturation" class="section">
+      <div class="section-header sat">Saturation</div>
+
+      <!-- DRIVE large knob -->
+      <div id="sat-main">
+        <div class="knob-wrap" id="knob-drive" data-id="drive" data-min="0" data-max="100" data-val="20" data-unit="%" data-color="#c0392b" data-size="55">
+          <svg id="svg-drive" width="55" height="55" viewBox="0 0 55 55"></svg>
+          <div class="knob-label">DRIVE</div>
+          <div class="knob-value" id="val-drive">20%</div>
+        </div>
+      </div>
+
+      <!-- EVEN + ODD medium knobs -->
+      <div id="sat-pair" class="knob-row">
+        <div class="knob-wrap" id="knob-even" data-id="even" data-min="0" data-max="100" data-val="0" data-unit="%" data-color="#c0392b" data-size="40">
+          <svg id="svg-even" width="40" height="40" viewBox="0 0 40 40"></svg>
+          <div class="knob-label">EVEN</div>
+          <div class="knob-value" id="val-even">0%</div>
+        </div>
+        <div class="knob-wrap" id="knob-odd" data-id="odd" data-min="0" data-max="100" data-val="0" data-unit="%" data-color="#c0392b" data-size="40">
+          <svg id="svg-odd" width="40" height="40" viewBox="0 0 40 40"></svg>
+          <div class="knob-label">ODD</div>
+          <div class="knob-value" id="val-odd">0%</div>
+        </div>
+      </div>
+
+      <!-- DRIVE CURVE DISPLAY -->
+      <div id="drive-curve-wrap">
+        <span id="drive-curve-label">Drive Curve</span>
+        <svg id="drive-curve-svg" viewBox="0 0 182 92" preserveAspectRatio="none">
+          <!-- Grid lines -->
+          <line x1="91" y1="0" x2="91" y2="92" stroke="#252525" stroke-width="0.8"/>
+          <line x1="0"  y1="46" x2="182" y2="46" stroke="#252525" stroke-width="0.8"/>
+          <line x1="45.5" y1="0" x2="45.5" y2="92" stroke="#1d1d1d" stroke-width="0.6"/>
+          <line x1="136.5" y1="0" x2="136.5" y2="92" stroke="#1d1d1d" stroke-width="0.6"/>
+          <line x1="0" y1="23" x2="182" y2="23" stroke="#1d1d1d" stroke-width="0.6"/>
+          <line x1="0" y1="69" x2="182" y2="69" stroke="#1d1d1d" stroke-width="0.6"/>
+          <!-- Reference 45° line -->
+          <line x1="0" y1="92" x2="182" y2="0" stroke="#2a2a2a" stroke-width="0.8" stroke-dasharray="3 3"/>
+          <!-- Curve path — updated by JS -->
+          <path id="drive-curve-path" fill="none" stroke="#c0392b" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"
+            filter="url(#red-glow)"/>
+          <defs>
+            <filter id="red-glow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+      </div>
+
+    </div><!-- /section-saturation -->
+
+    <!-- ── CENTER SECTION ──────────────────── -->
+    <div id="section-center">
+
+      <!-- Title block -->
+      <div id="center-title-block">
+        <div id="plugin-name">NBS DynaDrive</div>
+        <div id="plugin-tagline">Clean saturation without aliasing &mdash; Neve warmth, API dynamics</div>
+      </div>
+
+      <!-- Body: toggle + knob row -->
+      <div id="center-body">
+
+        <!-- Pre/Post pill toggle -->
+        <div id="prepost-toggle" class="state-dyn">
+          <span id="prepost-label">DYN &rarr; SAT</span>
+        </div>
+
+        <!-- INPUT / MIX / OUTPUT row -->
+        <div id="center-knob-row">
+
+          <div class="knob-wrap" id="knob-input" data-id="input" data-min="-48" data-max="10" data-val="0" data-unit=" dB" data-color="#888888" data-size="35" data-style="circle-fill">
+            <svg id="svg-input" width="35" height="35" viewBox="0 0 35 35"></svg>
+            <div class="knob-label">INPUT</div>
+            <div class="knob-value" id="val-input">0.0 dB</div>
+          </div>
+
+          <!-- MIX — full 360° fill indicator -->
+          <div class="knob-wrap" id="knob-mix" data-id="mix" data-min="0" data-max="100" data-val="100" data-unit="%" data-color="#888888" data-size="35" data-style="circle-fill">
+            <svg id="svg-mix" width="35" height="35" viewBox="0 0 35 35"></svg>
+            <div class="knob-label">MIX</div>
+            <div class="knob-value" id="val-mix">100%</div>
+          </div>
+
+          <div class="knob-wrap" id="knob-output" data-id="output" data-min="-48" data-max="10" data-val="0" data-unit=" dB" data-color="#888888" data-size="35" data-style="circle-fill">
+            <svg id="svg-output" width="35" height="35" viewBox="0 0 35 35"></svg>
+            <div class="knob-label">OUTPUT</div>
+            <div class="knob-value" id="val-output">0.0 dB</div>
+          </div>
+
+        </div><!-- /center-knob-row -->
+
+      </div><!-- /center-body -->
+
+    </div><!-- /section-center -->
+
+    <!-- ── DYNAMICS SECTION ─────────────────── -->
+    <div id="section-dynamics" class="section">
+      <div class="section-header dyn">Dynamics</div>
+
+      <!-- DYNAMICS large knob -->
+      <div id="dyn-main">
+        <div class="knob-wrap" id="knob-dynamics" data-id="dynamics" data-min="0" data-max="100" data-val="30" data-unit="%" data-color="#4a90d9" data-size="55">
+          <svg id="svg-dynamics" width="55" height="55" viewBox="0 0 55 55"></svg>
+          <div class="knob-label">DYNAMICS</div>
+          <div class="knob-value" id="val-dynamics">30%</div>
+        </div>
+      </div>
+
+      <!-- UP + DOWN small knobs -->
+      <div id="dyn-pair" class="knob-row">
+        <div class="knob-wrap" id="knob-up" data-id="up" data-min="0" data-max="100" data-val="0" data-unit="%" data-color="#4a90d9" data-size="35">
+          <svg id="svg-up" width="35" height="35" viewBox="0 0 35 35"></svg>
+          <div class="knob-label">UP</div>
+          <div class="knob-value" id="val-up">0%</div>
+        </div>
+        <div class="knob-wrap" id="knob-down" data-id="down" data-min="0" data-max="100" data-val="50" data-unit="%" data-color="#4a90d9" data-size="35">
+          <svg id="svg-down" width="35" height="35" viewBox="0 0 35 35"></svg>
+          <div class="knob-label">DOWN</div>
+          <div class="knob-value" id="val-down">50%</div>
+        </div>
+      </div>
+
+      <!-- DYN CURVE DISPLAY -->
+      <div id="dyn-curve-wrap">
+        <span id="dyn-curve-label">Dyn Curve</span>
+        <svg id="dyn-curve-svg" viewBox="0 0 158 92" preserveAspectRatio="none">
+          <!-- Grid lines -->
+          <line x1="79"  y1="0"  x2="79"  y2="92"  stroke="#252525" stroke-width="0.8"/>
+          <line x1="0"   y1="46" x2="158" y2="46"   stroke="#252525" stroke-width="0.8"/>
+          <line x1="39.5" y1="0" x2="39.5" y2="92"  stroke="#1d1d1d" stroke-width="0.6"/>
+          <line x1="118.5" y1="0" x2="118.5" y2="92" stroke="#1d1d1d" stroke-width="0.6"/>
+          <line x1="0" y1="23" x2="158" y2="23"     stroke="#1d1d1d" stroke-width="0.6"/>
+          <line x1="0" y1="69" x2="158" y2="69"     stroke="#1d1d1d" stroke-width="0.6"/>
+          <!-- Curve path — updated by JS -->
+          <path id="dyn-curve-path" fill="none" stroke="#4a90d9" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"
+            filter="url(#blue-glow)"/>
+          <defs>
+            <filter id="blue-glow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+      </div>
+
+    </div><!-- /section-dynamics -->
+
+    <!-- ── METER SECTION ──────────────────────── -->
+    <div id="section-meters">
+
+      <!-- INPUT stereo meter -->
+      <div class="meter-group">
+        <div class="meter-group-label">IN</div>
+        <div class="meter-pair">
+          <div class="meter-column">
+            <div class="meter-bar" id="meter-in-l-bar">
+              <div class="meter-fill" id="meter-in-l-fill" style="height:40%;background:linear-gradient(to top, #22c55e 0%, #22c55e 70%, #f59e0b 85%, #ef4444 100%);"></div>
+            </div>
+            <div class="meter-ch-label">L</div>
+          </div>
+          <div class="meter-column">
+            <div class="meter-bar" id="meter-in-r-bar">
+              <div class="meter-fill" id="meter-in-r-fill" style="height:35%;background:linear-gradient(to top, #22c55e 0%, #22c55e 70%, #f59e0b 85%, #ef4444 100%);"></div>
+            </div>
+            <div class="meter-ch-label">R</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OUTPUT stereo meter -->
+      <div class="meter-group" style="margin-top: 6px;">
+        <div class="meter-group-label">OUT</div>
+        <div class="meter-pair">
+          <div class="meter-column">
+            <div class="meter-bar" id="meter-out-l-bar">
+              <div class="meter-fill" id="meter-out-l-fill" style="height:38%;background:linear-gradient(to top, #22c55e 0%, #22c55e 70%, #f59e0b 85%, #ef4444 100%);"></div>
+            </div>
+            <div class="meter-ch-label">L</div>
+          </div>
+          <div class="meter-column">
+            <div class="meter-bar" id="meter-out-r-bar">
+              <div class="meter-fill" id="meter-out-r-fill" style="height:33%;background:linear-gradient(to top, #22c55e 0%, #22c55e 70%, #f59e0b 85%, #ef4444 100%);"></div>
+            </div>
+            <div class="meter-ch-label">R</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /section-meters -->
+
+  </div><!-- /main-panel -->
+
+  <!-- ══════════════════════════════════════════
+       ADVANCED TOGGLE BAR
+       ══════════════════════════════════════════ -->
+  <div id="advanced-toggle-bar" onclick="toggleAdvanced()">
+    <span id="adv-bar-label">Advanced</span>
+    <span id="adv-bar-arrow">&#9660;</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ADVANCED PANEL
+       ══════════════════════════════════════════ -->
+  <div id="advanced-panel">
+    <div id="advanced-panel-inner">
+
+      <!-- Dynamics detail column -->
+      <div class="adv-column">
+        <div class="adv-section-label dyn">Dynamics Detail</div>
+        <div class="adv-knob-row">
+          <div class="knob-wrap" id="knob-threshold" data-id="threshold" data-min="-40" data-max="0" data-val="-18" data-unit=" dB" data-color="#4a90d9" data-size="40">
+            <svg id="svg-threshold" width="40" height="40" viewBox="0 0 40 40"></svg>
+            <div class="knob-label">THRESHOLD</div>
+            <div class="knob-value" id="val-threshold">-18 dB</div>
+          </div>
+          <div class="knob-wrap" id="knob-ratio" data-id="ratio" data-min="1" data-max="10" data-val="4" data-unit=":1" data-color="#4a90d9" data-size="40">
+            <svg id="svg-ratio" width="40" height="40" viewBox="0 0 40 40"></svg>
+            <div class="knob-label">RATIO</div>
+            <div class="knob-value" id="val-ratio">4:1</div>
+          </div>
+          <div class="knob-wrap" id="knob-attack" data-id="attack_time" data-min="0.1" data-max="100" data-val="10" data-unit=" ms" data-color="#4a90d9" data-size="40">
+            <svg id="svg-attack" width="40" height="40" viewBox="0 0 40 40"></svg>
+            <div class="knob-label">ATTACK</div>
+            <div class="knob-value" id="val-attack_time">Auto</div>
+          </div>
+          <div class="knob-wrap" id="knob-release" data-id="release_time" data-min="10" data-max="1000" data-val="100" data-unit=" ms" data-color="#4a90d9" data-size="40">
+            <svg id="svg-release" width="40" height="40" viewBox="0 0 40 40"></svg>
+            <div class="knob-label">RELEASE</div>
+            <div class="knob-value" id="val-release_time">Auto</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="adv-divider"></div>
+
+      <!-- Saturation detail column -->
+      <div class="adv-column">
+        <div class="adv-section-label sat">H-Curve</div>
+        <div class="adv-combo-wrap adv-combo">
+          <div class="adv-combo-label">Saturation Shape</div>
+          <select id="h-curve-select" onchange="console.log('h_curve:', this.value)">
+            <option value="0">Soft</option>
+            <option value="1" selected>Medium</option>
+            <option value="2">Hard</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="adv-divider"></div>
+
+      <!-- M/S section -->
+      <div class="adv-column">
+        <div class="adv-section-label util">M/S Mode</div>
+        <div class="ms-toggle" id="ms-toggle" onclick="toggleMS()">STEREO</div>
+        <div id="ms-knobs">
+          <div class="knob-wrap" id="knob-mid" data-id="mid_drive" data-min="0" data-max="100" data-val="50" data-unit="%" data-color="#888888" data-size="35">
+            <svg id="svg-mid" width="35" height="35" viewBox="0 0 35 35"></svg>
+            <div class="knob-label">MID</div>
+            <div class="knob-value" id="val-mid_drive">50%</div>
+          </div>
+          <div class="knob-wrap" id="knob-side" data-id="side_drive" data-min="0" data-max="100" data-val="50" data-unit="%" data-color="#888888" data-size="35">
+            <svg id="svg-side" width="35" height="35" viewBox="0 0 35 35"></svg>
+            <div class="knob-label">SIDE</div>
+            <div class="knob-value" id="val-side_drive">50%</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /advanced-panel -->
+
+</div><!-- /plugin-shell -->
+
+<!-- Value tooltip -->
+<div id="value-tooltip"></div>
+
+<script>
+  /* ════════════════════════════════════════════════════
+     WEBVIEW CONSTRAINTS
+     ════════════════════════════════════════════════════ */
+  document.addEventListener("contextmenu", e => { e.preventDefault(); return false; });
+
+  /* ════════════════════════════════════════════════════
+     MOCK JUCE BACKEND
+     ════════════════════════════════════════════════════ */
+  window.Juce = {
+    getSliderState: id => ({
+      normalisedValue: 0.5,
+      valueChangedEvent: { addListener: fn => console.log(`[Juce] listener: ${id}`) }
+    }),
+    getToggleState: id => ({
+      value: false,
+      valueChangedEvent: { addListener: fn => console.log(`[Juce] listener: ${id}`) }
+    }),
+    getComboBoxState: id => ({
+      selectedId: 1,
+      valueChangedEvent: { addListener: fn => console.log(`[Juce] listener: ${id}`) }
+    })
+  };
+
+  /* ════════════════════════════════════════════════════
+     PARAMETER STATE MAP
+     ════════════════════════════════════════════════════ */
+  const params = {
+    drive:        { val: 20,  min: 0,    max: 100,  unit: '%',  color: '#c0392b', size: 55, knobEl: null },
+    even:         { val: 0,   min: 0,    max: 100,  unit: '%',  color: '#c0392b', size: 40, knobEl: null },
+    odd:          { val: 0,   min: 0,    max: 100,  unit: '%',  color: '#c0392b', size: 40, knobEl: null },
+    input:        { val: 0,   min: -48,  max: 10,   unit: ' dB', color: '#888888', size: 35, knobEl: null, circleFill: true },
+    mix:          { val: 100, min: 0,    max: 100,  unit: '%',  color: '#888888', size: 35, knobEl: null, circleFill: true },
+    output:       { val: 0,   min: -48,  max: 10,   unit: ' dB', color: '#888888', size: 35, knobEl: null, circleFill: true },
+    dynamics:     { val: 30,  min: 0,    max: 100,  unit: '%',  color: '#4a90d9', size: 55, knobEl: null },
+    up:           { val: 0,   min: 0,    max: 100,  unit: '%',  color: '#4a90d9', size: 35, knobEl: null },
+    down:         { val: 50,  min: 0,    max: 100,  unit: '%',  color: '#4a90d9', size: 35, knobEl: null },
+    threshold:    { val: -18, min: -40,  max: 0,    unit: ' dB', color: '#4a90d9', size: 40, knobEl: null },
+    ratio:        { val: 4,   min: 1,    max: 10,   unit: ':1', color: '#4a90d9', size: 40, knobEl: null },
+    attack_time:  { val: 10,  min: 0.1,  max: 100,  unit: ' ms', color: '#4a90d9', size: 40, knobEl: null },
+    release_time: { val: 100, min: 10,   max: 1000, unit: ' ms', color: '#4a90d9', size: 40, knobEl: null },
+    mid_drive:    { val: 50,  min: 0,    max: 100,  unit: '%',  color: '#888888', size: 35, knobEl: null },
+    side_drive:   { val: 50,  min: 0,    max: 100,  unit: '%',  color: '#888888', size: 35, knobEl: null },
+  };
+
+  /* ════════════════════════════════════════════════════
+     KNOB RENDERING
+     ════════════════════════════════════════════════════ */
+
+  // Convert normalised 0-1 to SVG arc path for a 270° arc knob
+  function renderKnobArc(svgEl, size, color, normVal) {
+    const r = size * 0.5;
+    const cx = r;
+    const cy = r;
+    const trackR = r - 4;
+    const arcR   = r - 4;
+
+    // 270° arc: starts at 135° (bottom-left), ends at 45° (bottom-right)
+    const startDeg = 135;
+    const sweepDeg = 270;
+    const endDeg   = startDeg + sweepDeg * normVal;
+
+    function toRad(d) { return d * Math.PI / 180; }
+    function pt(angle, rad) {
+      return [
+        cx + rad * Math.cos(toRad(angle - 90)),
+        cy + rad * Math.sin(toRad(angle - 90))
+      ];
+    }
+
+    // Track (background ring)
+    const trackStart = pt(startDeg, trackR);
+    const trackEnd   = pt(startDeg + sweepDeg, trackR);
+    const trackLarge = 1;
+    const trackPath  = `M ${trackStart[0]} ${trackStart[1]} A ${trackR} ${trackR} 0 ${trackLarge} 1 ${trackEnd[0]} ${trackEnd[1]}`;
+
+    // Active arc
+    let arcPath = '';
+    if (normVal > 0.001) {
+      const arcEnd   = pt(endDeg, arcR);
+      // Large-arc-flag triggers when actual sweep > 180°: 270 * normVal > 180 → normVal > 0.6667
+      const arcLarge = (sweepDeg * normVal) > 180 ? 1 : 0;
+      arcPath = `M ${pt(startDeg, arcR)[0]} ${pt(startDeg, arcR)[1]} A ${arcR} ${arcR} 0 ${arcLarge} 1 ${arcEnd[0]} ${arcEnd[1]}`;
+    }
+
+    // Knob body
+    const bodyR = r - 8;
+    // Indicator dot angle (maps 0→135°, 1→45° going clockwise)
+    const dotAngle = startDeg + sweepDeg * normVal;
+    const dotR = bodyR * 0.65;
+    const dotPt = [
+      cx + dotR * Math.cos(toRad(dotAngle - 90)),
+      cy + dotR * Math.sin(toRad(dotAngle - 90))
+    ];
+
+    svgEl.innerHTML = `
+      <defs>
+        <radialGradient id="knob-grad-${size}" cx="40%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#2c2c2c"/>
+          <stop offset="100%" stop-color="#141414"/>
+        </radialGradient>
+      </defs>
+      <!-- Track ring -->
+      <path d="${trackPath}" fill="none" stroke="#232323" stroke-width="3" stroke-linecap="round"/>
+      <!-- Active arc -->
+      ${normVal > 0.001 ? `<path d="${arcPath}" fill="none" stroke="${color}" stroke-width="2.8" stroke-linecap="round"
+        filter="url(#knob-glow-${size})"/>` : ''}
+      <defs>
+        <filter id="knob-glow-${size}" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Knob body -->
+      <circle cx="${cx}" cy="${cy}" r="${bodyR}" fill="url(#knob-grad-${size})" stroke="#0a0a0a" stroke-width="1.2"/>
+      <!-- Indicator dot -->
+      <circle cx="${dotPt[0]}" cy="${dotPt[1]}" r="1.8" fill="${color}" opacity="0.9"/>
+    `;
+  }
+
+  // Render full 360° fill circle (Mix knob — Change 1)
+  function renderCircleFillKnob(svgEl, size, color, normVal) {
+    const r = size * 0.5;
+    const cx = r;
+    const cy = r;
+    const ringR = r - 4;
+    const bodyR = r - 8;
+    const uid = svgEl.id || ('cf-' + Math.random().toString(36).slice(2, 6));
+
+    function toRad(d) { return d * Math.PI / 180; }
+
+    // Full circle track (dim ring)
+    const trackPath = `M ${cx} ${cy - ringR} A ${ringR} ${ringR} 0 1 1 ${cx - 0.001} ${cy - ringR}`;
+
+    // Fill arc: clockwise from top (12 o'clock)
+    let fillPath = '';
+    if (normVal > 0.001) {
+      if (normVal >= 0.999) {
+        fillPath = `M ${cx} ${cy - ringR} A ${ringR} ${ringR} 0 1 1 ${cx - 0.001} ${cy - ringR}`;
+      } else {
+        const endAngle = normVal * 360;
+        const endRad = toRad(endAngle - 90);
+        const ex = cx + ringR * Math.cos(endRad);
+        const ey = cy + ringR * Math.sin(endRad);
+        const large = normVal > 0.5 ? 1 : 0;
+        fillPath = `M ${cx} ${cy - ringR} A ${ringR} ${ringR} 0 ${large} 1 ${ex} ${ey}`;
+      }
+    }
+
+    // Indicator dot position
+    const dotAngleDeg = normVal * 360;
+    const dotRad = toRad(dotAngleDeg - 90);
+    const dotDist = bodyR * 0.65;
+    const dotPt = [cx + dotDist * Math.cos(dotRad), cy + dotDist * Math.sin(dotRad)];
+
+    svgEl.innerHTML = `
+      <defs>
+        <radialGradient id="cf-grad-${uid}" cx="40%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#2c2c2c"/>
+          <stop offset="100%" stop-color="#141414"/>
+        </radialGradient>
+        <filter id="cf-glow-${uid}" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Track (dim full ring) -->
+      <path d="${trackPath}" fill="none" stroke="#252525" stroke-width="2.8"/>
+      <!-- Fill arc (clockwise from top) -->
+      ${normVal > 0.001 ? `<path d="${fillPath}" fill="none" stroke="${color}" stroke-width="2.8" stroke-linecap="round" filter="url(#cf-glow-${uid})"/>` : ''}
+      <!-- Knob body -->
+      <circle cx="${cx}" cy="${cy}" r="${bodyR}" fill="url(#cf-grad-${uid})" stroke="#0a0a0a" stroke-width="1.2"/>
+      <!-- Indicator dot -->
+      <circle cx="${dotPt[0]}" cy="${dotPt[1]}" r="1.8" fill="${color}" opacity="0.9"/>
+    `;
+  }
+
+  function renderKnob(id) {
+    const p = params[id];
+    if (!p) return;
+    const svgEl = document.getElementById(`svg-${id}`) || document.getElementById(`svg-${id.replace('_','-')}`);
+    // Handle id → svg id mapping
+    const svgMap = {
+      drive: 'svg-drive', even: 'svg-even', odd: 'svg-odd',
+      input: 'svg-input', mix: 'svg-mix', output: 'svg-output',
+      dynamics: 'svg-dynamics', up: 'svg-up', down: 'svg-down',
+      threshold: 'svg-threshold', ratio: 'svg-ratio',
+      attack_time: 'svg-attack', release_time: 'svg-release',
+      mid_drive: 'svg-mid', side_drive: 'svg-side'
+    };
+    const el = document.getElementById(svgMap[id]);
+    if (!el) return;
+    const norm = (p.val - p.min) / (p.max - p.min);
+    if (p.circleFill) {
+      renderCircleFillKnob(el, p.size, p.color, norm);
+    } else {
+      renderKnobArc(el, p.size, p.color, norm);
+    }
+    // Update value display
+    const valEl = document.getElementById(`val-${id}`);
+    if (valEl) {
+      let display = '';
+      if (id === 'attack_time' || id === 'release_time') {
+        display = 'Auto'; // would be real ms in production
+      } else if (id === 'ratio') {
+        display = `${p.val.toFixed(1)}:1`;
+      } else if (Number.isInteger(p.val) || id === 'drive' || id === 'even' || id === 'odd' || id === 'dynamics' || id === 'up' || id === 'down' || id === 'mix' || id === 'mid_drive' || id === 'side_drive') {
+        display = `${Math.round(p.val)}${p.unit}`;
+      } else {
+        display = `${p.val.toFixed(1)}${p.unit}`;
+      }
+      valEl.textContent = display;
+    }
+  }
+
+  /* ════════════════════════════════════════════════════
+     KNOB INTERACTION — click+drag vertical
+     ════════════════════════════════════════════════════ */
+  let dragState = null;
+  const tooltip = document.getElementById('value-tooltip');
+
+  function showTooltip(x, y, text) {
+    tooltip.textContent = text;
+    tooltip.style.left = `${x + 14}px`;
+    tooltip.style.top  = `${y - 10}px`;
+    tooltip.classList.add('visible');
+  }
+
+  function hideTooltip() {
+    tooltip.classList.remove('visible');
+  }
+
+  document.querySelectorAll('.knob-wrap').forEach(el => {
+    const id = el.dataset.id;
+
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      dragState = {
+        id,
+        startY: e.clientY,
+        startVal: params[id].val,
+        range: params[id].max - params[id].min
+      };
+    });
+
+    el.addEventListener('dblclick', () => {
+      const defaults = {
+        drive: 20, even: 0, odd: 0, input: 0, mix: 100, output: 0,
+        dynamics: 30, up: 0, down: 50, threshold: -18, ratio: 4,
+        attack_time: 10, release_time: 100, mid_drive: 50, side_drive: 50
+      };
+      if (defaults[id] !== undefined) {
+        params[id].val = defaults[id];
+        renderKnob(id);
+        updateCurves(id);
+        console.log(`[reset] ${id} → ${defaults[id]}`);
+      }
+    });
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragState) return;
+    const { id, startY, startVal, range } = dragState;
+    const p = params[id];
+    const sensitivity = 1.5; // px per % of range
+    const delta = (startY - e.clientY) / (180 / sensitivity) * range;
+    p.val = Math.max(p.min, Math.min(p.max, startVal + delta));
+    renderKnob(id);
+    updateCurves(id);
+
+    const norm = (p.val - p.min) / (p.max - p.min);
+    let dispVal = '';
+    if (id === 'ratio') dispVal = `${p.val.toFixed(1)}:1`;
+    else if (Number.isInteger(Math.round(p.val)) && p.unit === '%') dispVal = `${Math.round(p.val)}%`;
+    else dispVal = `${p.val.toFixed(1)}${p.unit}`;
+    showTooltip(e.clientX, e.clientY, `${id.replace('_',' ').toUpperCase()} ${dispVal}`);
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (dragState) {
+      console.log(`[param] ${dragState.id} = ${params[dragState.id].val.toFixed(2)}`);
+      dragState = null;
+      hideTooltip();
+    }
+  });
+
+  /* ════════════════════════════════════════════════════
+     DRIVE CURVE — Change 3
+     ════════════════════════════════════════════════════ */
+  function computeTransferCurve(drive, even, odd) {
+    const d = drive / 100;
+    const e = even / 100;
+    const o = odd / 100;
+    return x => {
+      const driven   = x * (1 + d * 3);
+      const softclip = driven / (1 + Math.abs(driven));
+      const evenShift = e * 0.3 * (x * x);
+      const oddClip  = o * 0.2 * (driven * driven * driven) / (1 + driven * driven);
+      return Math.max(-1, Math.min(1, softclip + evenShift - oddClip));
+    };
+  }
+
+  function updateDriveCurve() {
+    const W = 182, H = 92;
+    const fn = computeTransferCurve(params.drive.val, params.even.val, params.odd.val);
+    const points = [];
+    const steps = 80;
+    for (let i = 0; i <= steps; i++) {
+      const x = -1 + (2 * i / steps);        // -1 to +1
+      const y = fn(x);                         // -1 to +1
+      const px = ((x + 1) / 2) * W;           // map to SVG x
+      const py = ((1 - y) / 2) * H;           // map to SVG y (flip)
+      points.push(`${i === 0 ? 'M' : 'L'} ${px.toFixed(2)} ${py.toFixed(2)}`);
+    }
+    document.getElementById('drive-curve-path').setAttribute('d', points.join(' '));
+  }
+
+  /* ════════════════════════════════════════════════════
+     DYN CURVE — Change 4
+     ════════════════════════════════════════════════════ */
+  function computeCompressorCurve(threshold, ratio, dynamics, up, down) {
+    const kneeWidth = 6 * (dynamics / 100);
+    // Downward ratio: scale from 1:1 (no compression) to full ratio based on DOWN knob
+    const downRatio = 1 + (ratio - 1) * (down / 100);
+    // Upward ratio: 1:1 (no upward) to 4:1 upward based on UP knob
+    const upRatio = 1 + (up / 100) * 3;
+
+    return inputDb => {
+      let outputDb = inputDb;
+
+      // ── DOWNWARD COMPRESSION (above threshold) ──
+      if (downRatio > 1.001) {
+        if (kneeWidth < 0.01) {
+          // Hard knee
+          if (inputDb > threshold) {
+            outputDb = threshold + (inputDb - threshold) / downRatio;
+          }
+        } else {
+          // Soft knee
+          const kneeLow = threshold - kneeWidth / 2;
+          const kneeHigh = threshold + kneeWidth / 2;
+          if (inputDb > kneeHigh) {
+            outputDb = threshold + (inputDb - threshold) / downRatio;
+          } else if (inputDb > kneeLow) {
+            const t = (inputDb - kneeLow) / kneeWidth;
+            outputDb = inputDb + (1 / downRatio - 1) * t * t * kneeWidth / 2;
+          }
+        }
+      }
+
+      // ── UPWARD COMPRESSION (below threshold) ──
+      if (upRatio > 1.001 && inputDb < threshold) {
+        const below = threshold - inputDb;
+        const compressed = below / upRatio;
+        const upOutput = threshold - compressed;
+        // Blend: upward compression replaces the linear region below threshold
+        outputDb = upOutput;
+        // If downward also modified the output above, keep the downward result
+        if (inputDb > threshold) outputDb = threshold + (inputDb - threshold) / downRatio;
+      }
+
+      return Math.max(-60, Math.min(0, outputDb));
+    };
+  }
+
+  function updateDynCurve() {
+    const W = 158, H = 92;
+    const dbMin = -60, dbMax = 0;
+    const fn = computeCompressorCurve(
+      params.threshold.val,
+      params.ratio.val,
+      params.dynamics.val,
+      params.up.val,
+      params.down.val
+    );
+    const points = [];
+    const steps = 80;
+    for (let i = 0; i <= steps; i++) {
+      const inputDb = dbMin + (dbMax - dbMin) * (i / steps);
+      const outputDb = Math.max(-60, Math.min(0, fn(inputDb)));
+      const px = ((inputDb - dbMin) / (dbMax - dbMin)) * W;
+      const py = (1 - (outputDb - dbMin) / (dbMax - dbMin)) * H;
+      points.push(`${i === 0 ? 'M' : 'L'} ${px.toFixed(2)} ${py.toFixed(2)}`);
+    }
+    document.getElementById('dyn-curve-path').setAttribute('d', points.join(' '));
+  }
+
+  function updateCurves(changedId) {
+    const satParams  = ['drive', 'even', 'odd'];
+    const dynParams  = ['threshold', 'ratio', 'dynamics', 'up', 'down'];
+    if (satParams.includes(changedId)) updateDriveCurve();
+    if (dynParams.includes(changedId)) updateDynCurve();
+  }
+
+  /* ════════════════════════════════════════════════════
+     PRE/POST PILL TOGGLE — Change 5
+     ════════════════════════════════════════════════════ */
+  let prePostState = 0; // 0 = DYN→SAT (active), 1 = SAT→DYN
+
+  document.getElementById('prepost-toggle').addEventListener('click', () => {
+    prePostState = prePostState === 0 ? 1 : 0;
+    const el = document.getElementById('prepost-toggle');
+    const lbl = document.getElementById('prepost-label');
+    if (prePostState === 0) {
+      el.className = 'state-dyn';
+      lbl.innerHTML = 'DYN &rarr; SAT';
+    } else {
+      el.className = 'state-sat';
+      lbl.innerHTML = 'SAT &rarr; DYN';
+    }
+    console.log(`[param] pre_post = ${prePostState} (${prePostState === 0 ? 'DYN→SAT' : 'SAT→DYN'})`);
+  });
+
+  /* ════════════════════════════════════════════════════
+     ADVANCED PANEL
+     ════════════════════════════════════════════════════ */
+  let advOpen = false;
+
+  function toggleAdvanced() {
+    advOpen = !advOpen;
+    const panel = document.getElementById('advanced-panel');
+    const arrow = document.getElementById('adv-bar-arrow');
+    panel.classList.toggle('open', advOpen);
+    arrow.classList.toggle('open', advOpen);
+  }
+
+  /* ════════════════════════════════════════════════════
+     M/S TOGGLE
+     ════════════════════════════════════════════════════ */
+  let msEnabled = false;
+
+  function toggleMS() {
+    msEnabled = !msEnabled;
+    const toggle = document.getElementById('ms-toggle');
+    const knobs  = document.getElementById('ms-knobs');
+    toggle.textContent = msEnabled ? 'M/S' : 'STEREO';
+    toggle.classList.toggle('active', msEnabled);
+    knobs.classList.toggle('visible', msEnabled);
+    console.log(`[param] ms_enable = ${msEnabled ? 1 : 0}`);
+  }
+
+  /* ════════════════════════════════════════════════════
+     METER SIMULATION
+     ════════════════════════════════════════════════════ */
+  let meterPhase = 0;
+
+  function animateMeters() {
+    meterPhase += 0.035;
+
+    // Input stereo levels (slightly different L/R for realism)
+    const inL = 30 + Math.sin(meterPhase) * 18 + Math.sin(meterPhase * 2.3) * 8;
+    const inR = 28 + Math.sin(meterPhase * 1.05 + 0.3) * 17 + Math.sin(meterPhase * 2.1 + 0.5) * 9;
+
+    // Output levels react to drive amount (more drive = more output + saturation effect)
+    const driveGain = 1 + (params.drive.val / 100) * 0.3;
+    const mixAmount = params.mix.val / 100;
+    const outL = (inL * driveGain * mixAmount + inL * (1 - mixAmount)) * 0.95;
+    const outR = (inR * driveGain * mixAmount + inR * (1 - mixAmount)) * 0.95;
+
+    const setMeter = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.style.height = `${Math.min(98, Math.max(2, val))}%`;
+    };
+
+    setMeter('meter-in-l-fill', inL);
+    setMeter('meter-in-r-fill', inR);
+    setMeter('meter-out-l-fill', outL);
+    setMeter('meter-out-r-fill', outR);
+
+    requestAnimationFrame(animateMeters);
+  }
+
+  /* ════════════════════════════════════════════════════
+     INIT
+     ════════════════════════════════════════════════════ */
+  document.addEventListener('DOMContentLoaded', () => {
+    // Render all knobs
+    Object.keys(params).forEach(id => renderKnob(id));
+
+    // Initial curve renders
+    updateDriveCurve();
+    updateDynCurve();
+
+    // Start meter animation
+    animateMeters();
+
+    console.log('[NBS DynaDrive v3] Mockup initialized');
+    console.log('[v3 fixes] ArcOverflow, CircleFillIO, StereoMeters, CompCurves, ToggleColor');
+  });
+</script>
+</body>
+</html>
