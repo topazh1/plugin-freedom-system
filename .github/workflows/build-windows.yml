@@ -47,5 +47,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Chaosverb-Windows-VST3
-          path: build/plugins/Chaosverb/Chaosverb_artefacts/Release/VST3/Chaosverb.vst3
+          path: build/plugins/Chaosverb/Chaosverb_artefacts/Release/VST3/Chaosverb.vst3/Contents/x86_64-win/Chaosverb.vst3
           retention-days: 7
