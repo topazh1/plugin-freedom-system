@@ -34,23 +34,18 @@ jobs:
           cmake -B build -S . 
           -G "Visual Studio 17 2022" 
           -A x64
-          -DCMAKE_BUILD_TYPE=Release \n          -DJUCE_COPY_PLUGIN_AFTER_BUILD=OFF
+          -DCMAKE_BUILD_TYPE=Release
           -DJUCE_BUILD_EXTRAS=OFF
           -DJUCE_BUILD_EXAMPLES=OFF
+          -DJUCE_COPY_PLUGIN_AFTER_BUILD=OFF
 
-      - name: Build
-        # Build the specific plugin or the whole project
-        run: cmake --build build --config Release --parallel 4 || true
-
-      - name: Find VST3 files
-        run: Get-ChildItem -Path . -Recurse -Filter *.vst3
-        shell: powershell
+      - name: Build Chaosverb
+        # Build only the Chaosverb target to bypass crashes in other plugins
+        run: cmake --build build --config Release --target Chaosverb --parallel 4 || true
 
       - name: Upload VST3 Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Chaosverb-Windows-VST3
-          # Path to where CMake outputs the VST3 on Windows. 
-          # Usually it's in the build directory under plugins/Chaosverb/Chaosverb_artefacts/Release/VST3/
-          path: build/**/Chaosverb.vst3
+          path: build/plugins/Chaosverb/Chaosverb_artefacts/Release/VST3/Chaosverb.vst3
           retention-days: 7
