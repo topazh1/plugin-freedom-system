@@ -29,7 +29,6 @@ jobs:
         shell: bash
 
       - name: Configure CMake
-        # Use a bash shell so we can use standard paths or pwsh
         run: >
           cmake -B build -S . 
           -G "Visual Studio 17 2022" 
@@ -37,11 +36,9 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DJUCE_BUILD_EXTRAS=OFF
           -DJUCE_BUILD_EXAMPLES=OFF
-          -DJUCE_COPY_PLUGIN_AFTER_BUILD=OFF
 
       - name: Build Chaosverb
-        # Build only the Chaosverb target to bypass crashes in other plugins
-        run: cmake --build build --config Release --target Chaosverb --parallel 4 || true
+        run: cmake --build build --config Release --target Chaosverb_VST3 --parallel 4 || true
 
       - name: Find VST3 files
         run: Get-ChildItem -Path . -Recurse -Filter *.vst3
