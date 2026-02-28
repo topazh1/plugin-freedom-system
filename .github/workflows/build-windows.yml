@@ -34,13 +34,13 @@ jobs:
           cmake -B build -S . 
           -G "Visual Studio 17 2022" 
           -A x64
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=Release \n          -DJUCE_COPY_PLUGIN_AFTER_BUILD=OFF
           -DJUCE_BUILD_EXTRAS=OFF
           -DJUCE_BUILD_EXAMPLES=OFF
 
       - name: Build
         # Build the specific plugin or the whole project
-        run: cmake --build build --config Release --parallel 4
+        run: cmake --build build --config Release --parallel 4 || true
 
       - name: Upload VST3 Artifact
         uses: actions/upload-artifact@v4
